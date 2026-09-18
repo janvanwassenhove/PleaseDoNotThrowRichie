@@ -31,3 +31,14 @@ body.touch .controls{display:none}body.touch .charge{bottom:150px;right:20px;wid
 @media (max-height:460px){.tcard h2{font-size:clamp(20px,6vh,30px);margin:8px 0}.tcard .copy{font-size:12px;line-height:1.4}.tkeys{margin-top:8px}.tdots{display:none}.tcard .btn{padding:9px 14px}}
 .tart{display:flex;flex-wrap:wrap;gap:6px;margin-top:16px;align-items:flex-end}.tart:empty{display:none}.tart img{height:54px;border:1px solid #3b5561;border-radius:3px;display:block}.tart img.cut{height:76px;border:0;filter:drop-shadow(0 3px 6px #0009)}
 @media (max-height:560px){.tart img{height:38px}.tart img.cut{height:52px}}@media (max-height:460px){.tart{display:none}}
+/* The way out of a run. The HUD ignores the pointer, so this one button takes it back. */
+.menubtn{pointer-events:auto;align-self:flex-start;background:#10232bd9;color:#f6f0e1;border:1px solid #58727a;border-radius:5px;padding:9px 13px;font:800 11px Arial,sans-serif;letter-spacing:.12em;cursor:pointer}
+.menubtn:hover,.menubtn:active{background:#ffbd5c;color:#122530;border-color:#ffbd5c}
+#pause .panel h2{margin:14px 0 10px}
+@media (max-width:760px){.menubtn{padding:7px 10px;font-size:10px;letter-spacing:.08em}}
+/* Portrait on a phone: the hint sits above the charge bar rather than across it. */
+@media (orientation:portrait){body.touch .hint{bottom:210px}}
+/* A phone in landscape has no room bottom-right: the charge meter moves up under the MENU
+   button rather than sitting across the action buttons. */
+@media (max-height:520px){body.touch .charge{top:74px;bottom:auto;left:50%;right:auto;width:min(46vw,220px);transform:translateX(-50%);text-align:center;font-size:11px}}
+

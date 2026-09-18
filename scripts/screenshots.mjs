@@ -135,6 +135,22 @@ try {
   await settle(page, 800);
   await shot(page, '10-keynote');
 
+  // The same build on a phone. A second context with a touch pointer is all it takes: the game
+  // picks its input path from the device, so the stick and the buttons appear on their own.
+  const phone = await browser.newPage({viewport: {width: 844, height: 390}, deviceScaleFactor: 2, hasTouch: true, isMobile: true});
+  phone.setDefaultTimeout(SLOW);
+  phone.on('pageerror', (e) => errors.push(`[phone] ${e.message}`));
+  await phone.goto(url, {waitUntil: 'load'});
+  await phone.waitForFunction(() => window.__richie && !document.getElementById('boot'), null, {timeout: SLOW});
+  await settle(phone);
+  await drive(phone, 'warp', 1);
+  await settle(phone);
+  await drive(phone, 'camera', -0.3, 0.3, 7.5);
+  await settle(phone, 600);
+  await drive(phone, 'charging', 0.6);
+  await settle(phone, 300);
+  await shot(phone, '12-phone');
+
   if (errors.length) throw new Error(`the page reported errors:\n  ${errors.join('\n  ')}`);
   console.log(`\nWrote screenshots to ${OUT}/`);
 } finally {

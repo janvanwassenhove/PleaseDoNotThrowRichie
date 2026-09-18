@@ -37,6 +37,7 @@ export const mats = {
   chrome: steel(0xd6dadd, .16, 1),
   brass: steel(0xc9a25a, .25, 1),
   wood: flat(0x3a271a, .55),
+  comb: flat(0xb9922f, .5, .35),
   rubber: flat(0x0c0d0f, .7),
   glass: new T.MeshPhysicalMaterial({color: 0xbfd8e6, roughness: .12, metalness: 0, transparent: true, opacity: .22, depthWrite: false, envMapIntensity: 1.6}),
   velvet: (() => {
@@ -121,6 +122,44 @@ function lightbox(scene: T.Object3D, map: T.Texture, w: number, h: number, x: nu
   q.position.set(x, y, z); q.rotation.y = yaw; scene.add(q);
   if (frame) { const f = new T.Mesh(new T.BoxGeometry(w + .12, h + .12, .08), mats.black); f.position.set(x - Math.sin(yaw) * .05, y, z - Math.cos(yaw) * .05); f.rotation.y = yaw; f.castShadow = true; scene.add(f); }
   return q;
+}
+
+// ------------------------------------------------------------------ escalators
+// The two escalators beside the grand staircase run. No geometry moves: the tread and handrail
+// textures scroll along the ramp, which reads as a running escalator from every angle the game
+// shows one, for two texture offsets a frame. main.ts owns the ramp collider and the ride that
+// carries Richie up. Increasing offset.y walks the pattern towards the top: the +Y face of a box
+// maps v backwards along z, so a rising offset moves a step edge the way the steps go.
+export const ESCALATOR_SPEED = 2.4;                     // metres a second, along the slope
+const STEP = .42, RAIL_TILE = .9;
+const running: {map: T.Texture; per: number}[] = [];
+export function escalatorSkin(len: number) {
+  const treadMap = canvasTex(256, 256, (c, w, h) => {
+    c.fillStyle = '#464c53'; c.fillRect(0, 0, w, h);
+    for (let i = 0; i < 26; i++) {                      // cleats, running the way the steps travel
+      c.fillStyle = '#292e33'; c.fillRect(i * w / 26, 0, w / 60, h);
+      c.fillStyle = '#5f6970'; c.fillRect(i * w / 26 + w / 60, 0, w / 110, h);
+    }
+    c.fillStyle = '#16191d'; c.fillRect(0, 0, w, h * .11);     // the gap between two steps
+    c.fillStyle = '#cfa130'; c.fillRect(0, h * .11, w, h * .05); // and its yellow nose
+  });
+  const railMap = canvasTex(32, 256, (c, w, h) => {
+    c.fillStyle = '#15171a'; c.fillRect(0, 0, w, h);
+    c.fillStyle = '#2b3036'; c.fillRect(0, h * .45, w, h * .09);
+  });
+  for (const [m, per] of [[treadMap, STEP], [railMap, RAIL_TILE]] as const) {
+    m.wrapS = m.wrapT = T.RepeatWrapping;
+    m.repeat.set(m === treadMap ? 2 : 1, len / per);
+    running.push({map: m, per});
+  }
+  return {
+    tread: new T.MeshStandardMaterial({map: treadMap, roughness: .5, metalness: .8}),
+    rail: new T.MeshStandardMaterial({map: railMap, roughness: .62, metalness: .1}),
+  };
+}
+/** Run them. Both go up, towards the keynote. */
+export function escalatorTick(dt: number) {
+  for (const r of running) r.map.offset.y = (r.map.offset.y + ESCALATOR_SPEED / r.per * dt) % 1;
 }
 
 export type Ctx = {scene: T.Scene; collide: (x: number, y: number, z: number, hw: number, hh: number, hd: number) => void; rowY: (i: number) => number; ROWS: number; ROW_D: number; Z0: number};
