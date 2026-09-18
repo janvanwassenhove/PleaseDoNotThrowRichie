@@ -19,8 +19,10 @@ const settle = (page, ms = 1200) => page.waitForTimeout(ms);
 const drive = (page, fn, ...args) => page.evaluate(([f, a]) => window.__richie[f](...a), [fn, args]);
 
 // CI captures on a software renderer: a single frame can take seconds, so every wait,
-// and the screenshot itself (which waits for a frame), gets a generous budget.
-const SLOW = 180_000;
+// and the screenshot itself (which waits for a frame), gets a generous budget. The finale
+// alone is nine seconds of game time at a fifth of a second a frame, with two spotlights
+// on a full stage: eight minutes covers a slow runner.
+const SLOW = 480_000;
 
 async function shot(page, name) {
   await page.screenshot({path: `${OUT}/${name}.png`, timeout: SLOW});

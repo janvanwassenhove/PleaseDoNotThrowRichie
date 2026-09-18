@@ -6,17 +6,39 @@ Asset: Richie's render model, `src/assets/richie.glb`. Source: the official Poll
 
 ## Devoxx robots and venue
 
-Asset: Voxxy, Droid, Biggy and the Kinepolis Antwerp journey. Source: the Robot Games reference page, https://game.devoxx.be/references.html, and the competition pages at https://game.devoxx.be/. Licence: competition reference material; no images are redistributed and no reference file is stored in this repository. Modified: original low-poly interpretations built to the published descriptions —
+Asset: Voxxy, Droid, Biggy and the Kinepolis Antwerp journey. Source: the Robot Games reference page, https://game.devoxx.be/references.html — the three model sheets (`voxxy-robot.png`, `droid-robot.png`, `biggy-robot.png`), the floor plans and the venue photographs. Licence: competition reference material; no reference image is redistributed or stored in this repository. Modified: original procedural models (`src/robots.ts`), with proportions measured off the sheets' front and profile views and materials matched to them —
 
-- **Voxxy**: "the orange companion — light, curious and quick on its feet". Orange, rounded and compact, with a dark visor and two lit eyes, a small antenna, stub arms and two short legs with wide feet.
-- **Droid**: "tall, weathered and deliberate, with exposed joints and scuffed panels — it has been in the building a long time". Tall and thin in graphite, with visible ball joints and pistons at hips, knees, shoulders and elbows, scuffed rust-brown panels, cable runs and a single wide sensor bar.
-- **Biggy**: "short legs, heavy armour, no hurry — slow to start and hard to stop once it is moving". Wide, low and blue-grey with layered riveted plates, orange bumpers, a sunken head with a narrow orange visor and four very short legs on flat feet.
+- **Voxxy** (sheet 01): a wide clear-coated orange head with two bear ears (white-backed), a black glass visor with dot-matrix orange eyes, white headphone discs with a lit ring round a square sensor; a thin dark neck; a pear-shaped body with panel seams, a belly slot and a white cat badge on the chest; small orange shoulder balls, thin black upper arms, big teardrop forearms with a white band, three black knuckled claws per hand; two stick legs on small orange feet. The eyes, badge, seams and the forearm band are drawn to canvas textures and mapped onto lathe profiles resampled by arc length.
+- **Droid** (sheet 02): a tall, slightly stooped graphite humanoid. Domed head with two warm lit round eyes and a mouth grille, thin neck with pistons, a breastplate that tapers to an exposed piston waist, pale shoulder collars with segment lines and copper trim, shoulder pads with a white ring emblem (an original one), long arms to the knees with four-fingered hands and a thumb, a V pelvis, drum hip and knee joints, thick thighs, long thin shins with calf plates and piston rods, flat feet.
+- **Biggy** (sheet 03): a ball on two stubby legs. The front of the ball is a rusting orange belly with seams and a stencilled badge; the back is blue-grey plate with a hatch, a speaker, an exhaust stub and ports; a riveted, ridged helmet dome with two lens eyes sits on top over a dark slit, with two lugs and a whip antenna; pauldrons with an orange tip over drum shoulders; box forearms with an orange cuff and three dark fingers; orange thigh armour over dark boots.
 - **Kinepolis**: the plan is two levels. The ground floor holds the entrance stairs, reception, the BOF rooms and the exhibition hall; the grand staircase, flanked by escalators, leads up to the cinema level with its foyer and the corridor between auditoriums 1–14, where auditorium 8 is the keynote room. The game compresses that route into eight checkpoints and keeps the signage.
 
-The model sheets themselves could not be fetched from the environment that produced these models (the reference site is not reachable from it), so the robots are validated against the site's published descriptions and the earlier iteration's notes on the sheets' dominant colours, not against the sheet drawings pixel for pixel.
+An earlier iteration could not reach the reference site and worked from its published descriptions; iteration 10 had the sheets open side by side with the game and rebuilt all three robots against them (Biggy, for one, had been a box on four legs).
+
+## Generated textures
+
+Asset: the image textures under `src/assets/textures/`. Source: generated for this project with ChatGPT image generation (OpenAI), one prompt per image, in a single conversation on 2026-09-18; the prompts are recorded in `prompts/002-textures.md`. Licence: generated for this project by its author; no third-party photograph or texture library is involved. Modified: `scripts/import-texture.py` resizes each download, cross-fades tiling textures against a half-offset copy of themselves so opposite edges match, centre-crops posters to their frame, and cuts Duke out of his white background with a border flood-fill. Usage —
+
+| File | What it is | Where it is used |
+| --- | --- | --- |
+| `carpet-hall.jpg` | grey needle-felt exhibition carpet | ground-floor floors, booth pads (tinted per brand) |
+| `carpet-cinema.jpg` | midnight-navy cinema broadloom with confetti, stars and arcs | foyer, corridor, auditorium tiers |
+| `stone-floor.jpg` | honed grey terrazzo | entrance steps, grand staircase, its landing |
+| `wall-acoustic.jpg` | dark acoustic cloth panels with shadow gaps | corridor and auditorium walls, the foyer's back wall |
+| `seat-velvet.jpg` | crimson cinema velour | seat cushions and backs, the recliner, the stage tabs |
+| `metal-rust-orange.jpg` | chipped safety-orange paint over rust | Biggy's belly, cuffs, thigh armour, pauldron tips |
+| `metal-bluegrey.jpg` | worn slate-blue armour plate | Biggy's dome, back, pauldrons and forearms |
+| `metal-graphite.jpg` | scuffed graphite plating | Droid |
+| `booth-1.jpg` … `booth-6.jpg` | booth backdrops for six absurd exhibitors: ROBO-BARISTA 9000, DUKE'S GADGET LAB, RUBBER DUCK AI, TOAST-AS-A-SERVICE, SELF-DRIVING OFFICE CHAIR, NULLPOINTER DETECTOR | the six exhibition booths; four reappear as sponsor lightboxes in the foyer |
+| `duke.png` | Duke as a cardboard standee with a lanyard and springy antennas | one by every booth |
+| `keynote-screen.jpg` | the keynote title slide, with the three robots in silhouette | the screen in auditorium 8 |
+
+Duke is the Java mascot, which Oracle released under the BSD licence (https://openjdk.org/projects/duke/). The generated standee came with a coffee-cup logo on its badge; that logo is a trademark, so the import step paints the badge over as a plain conference badge. Every texture is optional at runtime: a material whose image is missing falls back to a flat colour, and a booth without a poster sets its own name in type.
+
+The gadgets on the booths (a toaster with legs and antennae, a rubber duck with a propeller and one red eye, a paper cup on tank tracks holding a croissant aloft, an office chair with a lidar and boosters, an industrial arm offering a croissant), the popcorn machine, the light fittings, the truss and the seats are original procedural geometry (`src/venue.ts`).
 
 ## The crowd
 
 Asset: conference-goers walking the exhibition hall, foyer and corridor, seated in auditorium 8 and standing in its front rows. Source: original procedural figures (`src/people.ts`), seeded for variety — skin and hair, hoodies and T-shirts, jeans, glasses, beards, caps, backpacks, lanyards with badges, coffee cups, laptops, and shirt slogans (JAVA, DEVOXX, `git blame`, …) drawn to canvas textures at runtime. Security guards reuse the same figures with a black uniform, cap, radio, earpiece and a SECURITY shirt. No photographs or third-party models.
 
-No third-party audio, textures or generated meshes are included beyond the Reachy Mini geometry above. Materials, signs and venue geometry are made at runtime.
+No third-party audio, photographs or generated meshes are included. Beyond the Reachy Mini geometry and the generated textures above, materials, signs and venue geometry are made at runtime.
