@@ -17,8 +17,9 @@ The game is a static site: no backend, no account, no physical robot. Every rele
 | Activate a nearby assist | `E` |
 | Reset to the last checkpoint | `R` |
 | Orbit / zoom the camera | Drag / scroll |
+| Skip the opening | `SPACE`, `ENTER`, `E` or a tap |
 
-A keyboard is required — there are no touch controls, so a phone or tablet gets the opening cinematic and not much else. WebGL 2 is required; if it is missing or blocked, the page says so instead of going black.
+On a phone or tablet the controls are on screen: a stick to aim, **HOP** (hold to charge, let go to jump), **E** and **R**. Landscape works best. The game is a PWA — *Add to Home Screen* installs it, and after one visit it runs offline. WebGL 2 is required; if it is missing or blocked, the page says so instead of going black.
 
 ## Run it locally
 
@@ -53,7 +54,7 @@ pip download reachy-mini --no-deps -d /tmp/rm && (cd /tmp/rm && unzip -q *.whl)
 python3 scripts/build-richie.py /tmp/rm/reachy_mini/descriptions/reachy_mini/mjcf src/assets/richie.glb
 ```
 
-The wheel, not the git checkout: the repository keeps its STLs in Git LFS. Voxxy, Droid, Biggy and the venue are procedural, built to the [Robot Games references](https://game.devoxx.be/references.html) — see [asset sources](docs/ASSET-SOURCES.md).
+The wheel, not the git checkout: the repository keeps its STLs in Git LFS. Voxxy, Droid, Biggy (`src/robots.ts`), the conference crowd (`src/people.ts`) and the venue are procedural, built to the [Robot Games references](https://game.devoxx.be/references.html) — see [asset sources](docs/ASSET-SOURCES.md). `npm run icons` re-renders the PWA icons from `public/favicon.svg`.
 
 ## Deployment and releases
 

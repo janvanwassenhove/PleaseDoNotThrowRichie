@@ -88,7 +88,14 @@ try {
   await page.waitForFunction(() => window.__richie.pose().y > 15, null, {timeout: 15_000});
   await shot(page, '06-corridor');
 
-  // End card, with a plausible run behind it and the auditorium as the backdrop.
+  // Auditorium 8 from the doors at the top: the room rakes down to the keynote stage.
+  await drive(page, 'warp', 6);
+  await settle(page);
+  await drive(page, 'look', 0, 16.5, 184, 0, 8, 256);
+  await settle(page, 700);
+  await shot(page, '07-auditorium');
+
+  // End card, with a plausible run behind it and the stage as the backdrop.
   await drive(page, 'warp', 7);
   await settle(page);
   await drive(page, 'camera', 0, 0.3, 14);
@@ -98,7 +105,7 @@ try {
   });
   await drive(page, 'results');
   await settle(page, 600);
-  await shot(page, '07-keynote');
+  await shot(page, '08-keynote');
 
   if (errors.length) throw new Error(`the page reported errors:\n  ${errors.join('\n  ')}`);
   console.log(`\nWrote screenshots to ${OUT}/`);
