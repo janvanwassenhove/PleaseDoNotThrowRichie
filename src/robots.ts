@@ -47,6 +47,12 @@ export class Robot {
   private moving = 0;
   private kick = 0;
   private anim: (t: number, dt: number) => void;
+  private home = new T.Vector3();
+  private homeYaw = 0;
+  /** Finale: where the party is (Richie), and how long it has been going. */
+  private party: T.Vector3 | null = null;
+  private partyT = 0;
+  private partySpot = new T.Vector3();
 
   constructor(public kind: Kind, scale = 1) {
     this.anim = kind === 'voxxy' ? this.buildVoxxy() : kind === 'droid' ? this.buildDroid() : this.buildBiggy();
@@ -61,7 +67,24 @@ export class Robot {
     this.group.position.set(x, y, z);
     this.yaw = yaw;
     this.group.rotation.y = yaw;
+    if (!this.home.lengthSq()) { this.home.set(x, y, z); this.homeYaw = yaw; }
     return this;
+  }
+
+  /** Back to the patrol start, party over. */
+  reset() {
+    this.party = null; this.busy = false; this.wp = 0; this.pause = 1; this.kick = 0;
+    this.group.position.copy(this.home); this.yaw = this.homeYaw; this.group.rotation.y = this.yaw;
+    return this;
+  }
+
+  /** Grand finale: appear at `from`, run to the party and dance around `at`. */
+  celebrate(from: [number, number, number], at: T.Vector3) {
+    this.group.position.set(...from);
+    this.party = at.clone();
+    this.partyT = 0;
+    this.busy = true;
+    this.kick = 1;
   }
 
   /** Give the robot a loop to wander; points are absolute, at floor height. */
@@ -77,6 +100,28 @@ export class Robot {
     const p = this.group.position;
     let target: number | null = null;
     let moving = 0;
+    if (this.party) {
+      this.partyT += dt;
+      const a = this.party, tp = this.partyT;
+      // Each robot has its own idea of fun: Voxxy laps Richie, Droid takes the floor beside
+      // him, Biggy parks and spins. All of them first have to get there.
+      if (this.kind === 'voxxy') { const ang = tp * 1.4; this.partySpot.set(a.x + Math.sin(ang) * 2.8, a.y, a.z + Math.cos(ang) * 2.8); }
+      else if (this.kind === 'droid') this.partySpot.set(a.x - 3.2, a.y, a.z + .8);
+      else this.partySpot.set(a.x + 3.4, a.y, a.z - .4);
+      const dx = this.partySpot.x - p.x, dz = this.partySpot.z - p.z, d = Math.hypot(dx, dz);
+      const run = this.kind === 'voxxy' ? 5 : this.kind === 'droid' ? 3.2 : 2;
+      if (d > .25) { const s = Math.min(run * dt, d); p.x += dx / d * s; p.z += dz / d * s; moving = 1; target = Math.atan2(dx, dz); }
+      else if (this.kind === 'biggy') this.yaw += dt * .9;               // a slow victory spin
+      else target = Math.atan2(a.x - p.x, a.z - p.z);                  // face the guest of honour
+      p.y = a.y;
+      if (target !== null) this.yaw += wrap(target - this.yaw) * Math.min(1, dt * 6);
+      this.group.rotation.y = this.yaw;
+      this.moving += (moving - this.moving) * Math.min(1, dt * 6);
+      this.phase += dt * (this.kind === 'voxxy' ? 11 : this.kind === 'droid' ? 5 : 4) * Math.max(this.moving, .6);
+      this.kick = Math.max(.35, this.kick - dt * 1.6); // the party never quite calms down
+      this.anim(t, dt);
+      return;
+    }
     if (!this.busy && this.waypoints.length && this.pause <= 0) {
       const w = this.waypoints[this.wp];
       const dx = w.x - p.x, dz = w.z - p.z, d = Math.hypot(dx, dz);
@@ -143,8 +188,9 @@ export class Robot {
         l.hip.rotation.x = s * .55 * m;
         l.knee.rotation.x = Math.max(0, -s) * .8 * m;
       });
-      arms.forEach((a, i) => { a.rotation.x = -Math.sin(ph + i * Math.PI) * .5 * m + Math.sin(t * 1.7 + i) * .05 - k * 1.2; });
+      arms.forEach((a, i) => { a.rotation.x = this.party ? -2.4 + Math.sin(t * 9 + i * Math.PI) * .5 : -Math.sin(ph + i * Math.PI) * .5 * m + Math.sin(t * 1.7 + i) * .05 - k * 1.2; });
       antenna.rotation.x = Math.sin(t * 6 + ph) * (.08 + .25 * m + .4 * k);
+      if (this.party) body.position.y += Math.abs(Math.sin(t * 7)) * .3;
       eyes.forEach(e => { const mat = e.material as T.MeshStandardMaterial; mat.emissiveIntensity = 1.4 + Math.sin(t * 3) * .3 + (Math.sin(t * 1.3) > .97 ? -1.4 : 0); });
     };
   }
@@ -208,12 +254,15 @@ export class Robot {
         l.knee.rotation.x = Math.max(0, -s) * .7 * m;
       });
       arms.forEach((a, i) => {
+        if (this.party) { a.sh.rotation.x = -2.6 + Math.sin(t * 4 + i * Math.PI) * .6; a.el.rotation.x = -.8 + Math.sin(t * 8 + i) * .4; return; }
         a.sh.rotation.x = -Math.sin(ph + i * Math.PI) * .3 * m + Math.sin(t * .8 + i * 2) * .04;
         a.el.rotation.x = -.2 - Math.max(0, Math.sin(ph + i * Math.PI)) * .3 * m - k * .8;
       });
       // A slow scan of the room, interrupted by a sharp turn when something lands nearby.
-      head.rotation.y = Math.sin(t * .45) * .55 * (1 - k) + Math.sin(t * 9) * .12 * k;
-      head.rotation.x = -.05 + k * -.2;
+      // At the party the head keeps the beat instead.
+      head.rotation.y = this.party ? Math.sin(t * 4) * .35 : Math.sin(t * .45) * .55 * (1 - k) + Math.sin(t * 9) * .12 * k;
+      head.rotation.x = this.party ? -.15 + Math.sin(t * 8) * .12 : -.05 + k * -.2;
+      if (this.party) { torso.rotation.z = Math.sin(t * 4) * .08; torso.position.y = 2.85 + Math.abs(Math.sin(t * 4)) * .12; }
       (bar.material as T.MeshStandardMaterial).emissiveIntensity = 1.2 + Math.sin(t * 2.5) * .4 + k;
     };
   }
@@ -250,15 +299,15 @@ export class Robot {
     });
     return (t: number) => {
       const ph = this.phase, m = this.moving, k = this.kick;
-      body.rotation.z = Math.sin(ph) * .05 * m + k * Math.sin(t * 22) * .03;
-      body.rotation.x = Math.cos(ph) * .02 * m;
-      body.position.y = Math.abs(Math.sin(ph)) * .05 * m + Math.sin(t * 1.1) * .01;
+      body.rotation.z = Math.sin(ph) * .05 * m + k * Math.sin(t * 22) * .03 + (this.party ? Math.sin(t * 3) * .12 : 0);
+      body.rotation.x = Math.cos(ph) * .02 * m + (this.party ? Math.cos(t * 3) * .05 : 0);
+      body.position.y = Math.abs(Math.sin(ph)) * .05 * m + Math.sin(t * 1.1) * .01 + (this.party ? Math.abs(Math.sin(t * 3)) * .1 : 0);
       legs.forEach(({leg, i}) => {
         const s = Math.sin(ph + (i % 3 === 0 ? 0 : Math.PI)); // diagonal pairs
         leg.position.y = .38 + Math.max(0, s) * .12 * m;
         leg.rotation.x = s * .25 * m;
       });
-      (visor.material as T.MeshStandardMaterial).emissiveIntensity = 1.3 + Math.sin(t * 1.7) * .5 + k * 2;
+      (visor.material as T.MeshStandardMaterial).emissiveIntensity = this.party ? 1 + Math.abs(Math.sin(t * 10)) * 3 : 1.3 + Math.sin(t * 1.7) * .5 + k * 2;
     };
   }
 }
