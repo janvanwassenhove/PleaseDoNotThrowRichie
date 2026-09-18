@@ -78,11 +78,18 @@ Shared preamble:
   antennas. Pure white background, no shadow, no floor, no text. Portrait 2:3. *Post-processing: the
   generated badge carried a coffee-cup logo, which is a trademark; it was painted over as a plain
   conference badge.*
-- **keynote-screen** (`--size 1600 --crop 16x9`) — a cinematic conference keynote title slide, 16:9, flat
+- **keynote-screen** (superseded, see below) — a cinematic conference keynote title slide, 16:9, flat
   image, no screen frame, no room, no audience. Huge bold white text exactly "DEVOXX" and below it
   smaller text exactly "KEYNOTE". Dramatic glowing orange to deep magenta gradient with light rays and
   film grain, and the dark heroic silhouettes of three robots: one small round robot with bear ears,
   one tall thin humanoid droid, one huge ball-shaped heavy robot.
+
+- **keynote-bg** (`--size 1920 --crop 16x9`) — the same cinematic keynote backdrop as the DEVOXX KEYNOTE slide,
+  16:9, but with absolutely no text, no letters, no logos, no watermark. Orange to deep magenta sky with
+  volumetric light rays, a distant planet, film grain; in the lower half the dark heroic silhouettes of the
+  three robots on a ridge. The upper third left as clean glowing sky, because a logo goes there later.
+  *This replaced keynote-screen: the generated slide spelt DEVOXX in a font of its own invention, and the
+  human asked for the official logo, which the game now sets over this backdrop at runtime.*
 
 ## What did not work first time
 

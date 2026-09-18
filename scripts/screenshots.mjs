@@ -54,6 +54,13 @@ try {
   await settle(page);
   await shot(page, '01-title');
 
+  // The briefing: Biggy's card, shot live in the foyer.
+  await drive(page, 'tutorial', 3);
+  await settle(page, 1500);
+  await shot(page, '11-briefing');
+  await page.keyboard.press('Escape');                 // back to the title
+  await page.waitForFunction(() => window.__richie.state === 'title', null, {timeout: SLOW});
+
   // Opening cinematic, held on the shot that states the problem.
   await drive(page, 'cinematic', 5);
   await settle(page, 800);

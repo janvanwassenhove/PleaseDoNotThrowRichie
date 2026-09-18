@@ -8,7 +8,8 @@ import * as T from 'three';
 import {RoundedBoxGeometry} from 'three/addons/geometries/RoundedBoxGeometry.js';
 import {mergeGeometries} from 'three/addons/utils/BufferGeometryUtils.js';
 import {Kit, canvasTex, steel, glow, plastic, type V3} from './kit';
-import {tex, hasTex} from './textures';
+import {tex, hasTex, image} from './textures';
+import logoSvg from './assets/devoxx-white.svg?raw';
 
 type Look = {rough?: number; metal?: number; tint?: T.ColorRepresentation; bump?: number};
 /** A surface that tiles in metres: `tile` is the width one copy of the image covers. */
@@ -80,6 +81,40 @@ function textTex(text: string, o: TextOpts = {}) {
     if (o.sub) { c.font = `600 ${H * .16}px "Helvetica Neue", Arial, sans-serif`; c.fillText(o.sub, W / 2, H * .76, W * .92); }
   });
 }
+// The official Devoxx wordmark (src/assets/devoxx-white.svg: white, with the orange XX), so
+// every Devoxx sign in the building is the real logo rather than the word set in Arial. It is
+// white on transparent, which means dark panels: on Devoxx orange the XX would disappear. The
+// file has no intrinsic size, and some browsers will not draw a sizeless SVG to a canvas, so
+// it is given one on the way in.
+const LOGO_AR = 506.12 / 69.88;
+const logo = new Promise<HTMLImageElement | null>(res => {
+  const i = new Image();
+  i.onload = () => res(i); i.onerror = () => res(null);
+  i.src = URL.createObjectURL(new Blob([logoSvg.replace('<svg ', '<svg width="2024" height="280" ')], {type: 'image/svg+xml'}));
+});
+type LogoOpts = {bg?: string; fill?: number; vertical?: boolean; accent?: boolean; y?: number; under?: (c: CanvasRenderingContext2D, w: number, h: number) => void; over?: (c: CanvasRenderingContext2D, w: number, h: number) => void};
+/** A panel carrying the logo: `fill` is the share of the panel's long side the wordmark spans. */
+export function logoTex(W: number, H: number, o: LogoOpts = {}) {
+  const cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+  const t = new T.CanvasTexture(cv); t.colorSpace = T.SRGBColorSpace; t.anisotropy = 8;
+  const paint = (img: HTMLImageElement | null) => {
+    const c = cv.getContext('2d')!;
+    c.fillStyle = o.bg ?? '#0e1216'; c.fillRect(0, 0, W, H);
+    o.under?.(c, W, H);
+    if (o.accent) { c.fillStyle = '#f1a41c'; if (o.vertical) { c.fillRect(0, 0, W, 10); c.fillRect(0, H - 10, W, 10); } else c.fillRect(0, H - Math.max(6, H * .045), W, Math.max(6, H * .045)); }
+    if (img) {
+      const len = (o.vertical ? H : W) * (o.fill ?? .7), th = len / LOGO_AR;
+      c.save(); c.translate(W / 2, H * (o.y ?? .5)); if (o.vertical) c.rotate(-Math.PI / 2);
+      c.drawImage(img, -len / 2, -th / 2, len, th); c.restore();
+    }
+    o.over?.(c, W, H);
+    t.needsUpdate = true;
+  };
+  paint(null); void logo.then(paint);
+  t.userData.repaint = () => void logo.then(paint);   // for a panel whose `under` art arrives later
+  return t;
+}
+
 /** A self-lit sign: the face is unlit, so it reads as a lightbox in a dim room. */
 function lightbox(scene: T.Object3D, map: T.Texture, w: number, h: number, x: number, y: number, z: number, yaw: number, frame = true) {
   const q = new T.Mesh(new T.PlaneGeometry(w, h), new T.MeshBasicMaterial({map}));
@@ -219,19 +254,20 @@ function hall(c: Ctx, k: Kit, f: Kit) {
     f.add(new T.TorusGeometry(r, .055, 6, 40), mats.cool, scene, {p: [x, 6.27, z], r: [Math.PI / 2, 0, 0]});
     for (let i = 0; i < 3; i++) { const a = i * 2.1; f.rod(mats.black, scene, [x + Math.sin(a) * r, 6.3, z + Math.cos(a) * r], [x + Math.sin(a) * r, 7.6, z + Math.cos(a) * r], .008, .008, 6); }
   }
-  // Entrance portal.
+  // Entrance portal, with the logo over the doors, facing the street.
+  lightbox(scene, logoTex(2048, 420, {fill: .62, accent: true}), 9, 1.85, 0, 5.2, -9.58, Math.PI);
   for (const s of [-1, 1]) k.add(new T.BoxGeometry(.5, 7.6, .5), mats.black, scene, {p: [s * 7.4, 3.8, -9.3]});
   k.add(new T.BoxGeometry(15.3, .9, .5), mats.black, scene, {p: [0, 7.15, -9.3]});
   // Reception: a long white desk with the Devoxx stripe, a back wall and its sign.
   k.add(new T.BoxGeometry(6, 1.1, 1.0), mats.laminate, scene, {p: [-7, .55, 13.5]}); c.collide(-7, .575, 13.5, 3, .575, .5);
   k.add(new T.BoxGeometry(6.1, .06, 1.1), mats.black, scene, {p: [-7, 1.13, 13.5]});
   k.add(new T.BoxGeometry(6, 2.9, .3), mats.plasterDark, scene, {p: [-7, 1.45, 14.85]}); c.collide(-7, 1.45, 14.85, 3, 1.45, .15);
-  lightbox(scene, textTex('DEVOXX', {bg: '#f0640f', fg: '#ffffff', h: 160, font: 120}), 5.9, .62, -7, .6, 12.99, Math.PI, false);
+  lightbox(scene, logoTex(2048, 216, {fill: .34, accent: true}), 5.9, .62, -7, .6, 12.99, Math.PI, false);
   lightbox(scene, textTex('REGISTRATION', {bg: '#101418', fg: '#f6efe2', accent: '#f0640f', h: 220, font: 110}), 5.2, 1.1, -7, 2.15, 14.68, Math.PI);
   for (const x of [-9, -7, -5]) { k.at(x, 1.16, 13.45, Math.PI); k.add(new RoundedBoxGeometry(.5, .32, .03, 2, .01), mats.black, scene, {p: [0, .2, 0], r: [-.25, 0, 0]}); k.add(new T.BoxGeometry(.2, .03, .16), mats.black, scene, {p: [0, .015, .02]}); }
   k.at();
   // Hanging banners either side of the aisle.
-  const banner = new T.MeshStandardMaterial({map: canvasTex(256, 640, (g, w, h) => { g.fillStyle = '#f0640f'; g.fillRect(0, 0, w, h); g.fillStyle = '#fff'; g.font = '800 120px "Helvetica Neue", Arial'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.save(); g.translate(w / 2, h / 2); g.rotate(-Math.PI / 2); g.fillText('DEVOXX', 0, 8); g.restore(); }), roughness: .8});
+  const banner = new T.MeshStandardMaterial({map: logoTex(512, 1280, {vertical: true, fill: .78, accent: true}), roughness: .8});
   for (const z of [6, 28, 62]) for (const s of [-1, 1]) for (const yaw of [0, Math.PI]) { const q = new T.Mesh(new T.PlaneGeometry(1.1, 2.75), banner); q.position.set(s * 6.6, 5.9, z); q.rotation.y = yaw; scene.add(q); }
   let i = 0;
   for (let z = 34; z < 59; z += 9) for (const s of [-1, 1]) booth(c, k, s, z, i++);
@@ -248,6 +284,7 @@ function atrium(c: Ctx, k: Kit, f: Kit) {
     for (let i = 0; i <= 24; i += 4) k.rod(mats.chrome, scene, [s * 6.95, i * .25, 90 + i], [s * 6.95, 1.2 + i * .25, 90 + i], .022, .022, 8);
   }
   for (let z = 70; z <= 144; z += 7) for (const x of [-7, 0, 7]) f.add(new T.CircleGeometry(.16, 12), mats.warm, scene, {p: [x, 13.985, z], r: [Math.PI / 2, 0, 0]});
+  lightbox(scene, logoTex(2048, 440, {fill: .66, accent: true}), 11, 2.36, 0, 10.6, 145.46, Math.PI);
   // Foyer: warm rings, a bar that means it, and the sponsors' lightboxes on the walls.
   for (const [x, z, r] of [[-3, 121, 2.2], [3, 129, 1.7]]) { f.add(new T.TorusGeometry(r, .07, 6, 40), mats.black, scene, {p: [x, 12.32, z], r: [Math.PI / 2, 0, 0]}); f.add(new T.TorusGeometry(r, .055, 6, 40), mats.warm, scene, {p: [x, 12.27, z], r: [Math.PI / 2, 0, 0]}); }
   k.add(new T.BoxGeometry(4.2, .07, 1.6), mats.brass, scene, {p: [8, 7.235, 130]});
@@ -301,8 +338,12 @@ function auditorium(c: Ctx, k: Kit, f: Kit) {
     for (const s of [-1, 1]) { for (let x = 4.25; x <= 5.4; x += .14) f.add(new T.BoxGeometry(.035, .03, .035), mats.red, scene, {p: [s * x, y + .012, edge]}); f.add(new T.BoxGeometry(.05, .7, .22), mats.warm, scene, {p: [s * 13.38, y + 2.6, edge - 2.2]}); }
   }
   // The screen. With generated art it is the keynote slide; main.ts keeps the text sign otherwise.
-  const slide = tex('keynote-screen');
-  if (slide) { slide.wrapS = slide.wrapT = T.ClampToEdgeWrapping; lightbox(scene, slide, 19.2, 10.8, 0, 12.45, 268.7, Math.PI, false); k.add(new T.BoxGeometry(19.8, 11.4, .1), mats.black, scene, {p: [0, 12.45, 268.78]}); }
+  let backdrop: HTMLImageElement | null = null;
+  const slide = logoTex(1920, 1080, {bg: '#1a0a12', fill: .56, y: .27,
+    under: (g, w, h) => { if (backdrop) g.drawImage(backdrop, 0, 0, w, h); else { const gr = g.createLinearGradient(0, 0, 0, h); gr.addColorStop(0, '#f08a1c'); gr.addColorStop(.6, '#a02a4a'); gr.addColorStop(1, '#1a0a12'); g.fillStyle = gr; g.fillRect(0, 0, w, h); } const sh = g.createLinearGradient(0, 0, 0, h * .55); sh.addColorStop(0, 'rgba(10,4,8,.62)'); sh.addColorStop(1, 'rgba(10,4,8,0)'); g.fillStyle = sh; g.fillRect(0, 0, w, h * .55); },
+    over: (g, w, h) => { g.fillStyle = '#fff'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.font = `700 ${h * .062}px "Helvetica Neue", Arial, sans-serif`; (g as any).letterSpacing = `${h * .045}px`; g.fillText('KEYNOTE', w / 2 + h * .022, h * .435); }});
+  void image('keynote-bg').then(i => { if (i) { backdrop = i; slide.userData.repaint(); } });
+  lightbox(scene, slide, 19.2, 10.8, 0, 12.45, 268.7, Math.PI, false); k.add(new T.BoxGeometry(19.8, 11.4, .1), mats.black, scene, {p: [0, 12.45, 268.78]});
   const wash = new T.PointLight(0xff8a4a, 120, 60, 1.8); wash.position.set(0, 12, 262); scene.add(wash);
   // Lighting truss over the stage, par cans lit, and velvet tabs either side of the screen.
   for (const z of [248.6, 249.4]) for (const y of [18.6, 19.3]) f.rod(mats.chrome, scene, [-11.5, y, z], [11.5, y, z], .045, .045, 8);
