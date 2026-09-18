@@ -11,8 +11,9 @@ name: Release
 # cannot re-trigger this workflow. The commit also carries [skip ci] and the
 # `chore(release):` guard below, in case a PAT is ever wired up here.
 #
-# Publishing the release triggers deploy.yml at the new tag, so the live site on
-# GitHub Pages carries the version this run just cut.
+# The last job dispatches deploy.yml at the new tag, so the live site on GitHub
+# Pages carries the version this run just cut. (GitHub raises no events for the
+# release or the tag, because GITHUB_TOKEN created them, so it has to be explicit.)
 on:
   push:
     branches: [main]
@@ -26,6 +27,7 @@ on:
 
 permissions:
   contents: write
+  actions: write # to dispatch deploy.yml at the new tag
 
 concurrency:
   group: release-main
@@ -201,3 +203,14 @@ jobs:
             --notes-file notes.md \
             --latest \
             "${FILES[@]}"
+
+  # ----------------------------------------------------------------- pages
+  deploy:
+    name: Redeploy Pages at the tag
+    needs: [prepare, publish]
+    runs-on: ubuntu-latest
+    steps:
+      - env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ needs.prepare.outputs.tag }}
+        run: gh workflow run deploy.yml --repo "$GITHUB_REPOSITORY" --ref "$TAG"
