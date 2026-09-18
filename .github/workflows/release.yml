@@ -1,8 +1,10 @@
 name: Release
 
-# Every push to main cuts a patch release: the workflow bumps package.json, tags it,
-# captures gameplay screenshots, packages the built static site and publishes a
-# GitHub Release with an auto-generated changelog.
+# Every push to main cuts a patch release: the workflow captures gameplay screenshots
+# and packages the built static site from the pushed commit (each job bumps its own
+# checkout so the version badge already reads the release it is becoming), and only
+# then bumps package.json for real, tags it and publishes a GitHub Release with an
+# auto-generated changelog. Nothing is tagged unless everything before it succeeded.
 #
 # Use the manual "Run workflow" button for a minor/major bump instead.
 #
@@ -36,9 +38,9 @@ concurrency:
   cancel-in-progress: false # never abandon a half-published release
 
 jobs:
-  # -------------------------------------------- test, bump the version, tag it
+  # ------------------------------------------ test, and work out the next version
   prepare:
-    name: Test, bump & tag
+    name: Test & pick the version
     runs-on: ubuntu-latest
     # Skip the bump commit itself, and let a human opt out with [skip release].
     if: >-
@@ -46,31 +48,27 @@ jobs:
       (!startsWith(github.event.head_commit.message, 'chore(release):') &&
        !contains(github.event.head_commit.message, '[skip release]'))
     outputs:
-      version: ${{ steps.bump.outputs.version }}
-      tag: ${{ steps.bump.outputs.tag }}
+      version: ${{ steps.next.outputs.version }}
+      tag: ${{ steps.next.outputs.tag }}
+      level: ${{ steps.next.outputs.level }}
     steps:
       - uses: actions/checkout@v4
-        with:
-          ref: main # release the current tip of main, not a stale SHA
-          fetch-depth: 0 # full history for the changelog
       - uses: actions/setup-node@v4
         with: {node-version: 24, cache: npm}
       - run: npm ci
       - run: npm test
 
-      - name: Bump, commit and tag
-        id: bump
+      - name: Work out the next version
+        id: next
         run: |
           set -euo pipefail
-          git config user.name  'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           LEVEL='${{ github.event.inputs.bump || 'patch' }}'
-          # npm version updates package.json + lockfile, commits and tags v<x>.
+          # A dry bump: package.json in this checkout only, nothing committed or pushed.
           # tail -n1 guards against npm printing notices before the version line.
-          TAG="$(npm version "$LEVEL" -m 'chore(release): %s [skip ci]' | tail -n1)"
+          TAG="$(npm version "$LEVEL" --no-git-tag-version | tail -n1)"
+          echo "level=$LEVEL" >> "$GITHUB_OUTPUT"
           echo "version=${TAG#v}" >> "$GITHUB_OUTPUT"
           echo "tag=$TAG" >> "$GITHUB_OUTPUT"
-          git push --follow-tags origin HEAD:main
 
   # ------------------------------------------------------------- screenshots
   screenshots:
@@ -79,11 +77,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          ref: ${{ needs.prepare.outputs.tag }}
       - uses: actions/setup-node@v4
         with: {node-version: 24, cache: npm}
       - run: npm ci
+      - run: npm version '${{ needs.prepare.outputs.level }}' --no-git-tag-version # the badge shows the release it is becoming
       - run: npx playwright install --with-deps chromium
       - run: npm run screenshots
       # A hand-off to the publish job in the same run; the shots end up in the notes.
@@ -103,11 +100,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          ref: ${{ needs.prepare.outputs.tag }}
       - uses: actions/setup-node@v4
         with: {node-version: 24, cache: npm}
       - run: npm ci
+      - run: npm version '${{ needs.prepare.outputs.level }}' --no-git-tag-version
       - run: npm run build
       - name: Zip it
         run: |
@@ -123,14 +119,27 @@ jobs:
 
   # ------------------------------------------------------------ release notes
   publish:
-    name: Compose notes & publish
+    name: Bump, tag, compose notes & publish
     needs: [prepare, screenshots, site]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ needs.prepare.outputs.tag }}
           fetch-depth: 0 # full history so we can diff against the last tag
+      - uses: actions/setup-node@v4
+        with: {node-version: 24}
+
+      # Everything that could fail has succeeded: now the version bump is for real.
+      # The push is a fast-forward of main from the pushed commit; if main moved in the
+      # meantime it is refused and the release simply has to run again.
+      - name: Bump, commit and tag
+        run: |
+          set -euo pipefail
+          git config user.name  'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          TAG="$(npm version '${{ needs.prepare.outputs.level }}' -m 'chore(release): %s [skip ci]' | tail -n1)"
+          [ "$TAG" = '${{ needs.prepare.outputs.tag }}' ] || { echo "version drifted: $TAG vs ${{ needs.prepare.outputs.tag }}"; exit 1; }
+          git push --follow-tags origin HEAD:main
 
       # Pull every artifact (screenshots + the zipped site) into ./artifacts/*.
       - uses: actions/download-artifact@v4
@@ -140,6 +149,7 @@ jobs:
       - name: Compose release notes
         shell: bash
         env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAG: ${{ needs.prepare.outputs.tag }}
           VERSION: ${{ needs.prepare.outputs.version }}
           REPO: ${{ github.repository }}
@@ -148,8 +158,10 @@ jobs:
           DL="https://github.com/$REPO/releases/download/$TAG"
           ZIP="PleaseDoNotThrowRichie-$VERSION-web.zip"
 
-          # Commits since the previous tag (or the whole history for the first release).
-          PREV="$(git describe --tags --abbrev=0 "$TAG^" 2>/dev/null || echo '')"
+          # Commits since the previous *published* release (or the whole history for the
+          # first one). Not the previous tag: a run that tagged and then failed leaves a tag
+          # with no release behind, and that must not swallow its commits from the notes.
+          PREV="$(gh release view --json tagName -q .tagName 2>/dev/null || echo '')"
           if [ -n "$PREV" ]; then RANGE="$PREV..$TAG"; else RANGE="$TAG"; fi
 
           {
