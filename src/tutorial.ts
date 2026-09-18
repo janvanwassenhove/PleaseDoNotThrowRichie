@@ -16,8 +16,8 @@ export const cards = (hop: string, touch: boolean): Card[] => [
   {
     focus: 'richie', tag: 'RICHIE', title: 'HE HOPS. THAT IS ALL HE DOES.',
     body: 'Aim, hold to charge, let go. His head sinks as the charge builds. He will land badly, tumble, and right himself a second later. Stuck, or off the edge of the world? Reset to the last of eight checkpoints. There are no lives to lose.',
-    keys: touch ? [['STICK', 'aim'], ['HOP', 'hold to charge, release to hop'], ['R', 'back to checkpoint'], ['DRAG', 'look around']]
-      : [['WASD', 'aim'], ['SPACE', 'hold to charge, release to hop'], ['R', 'back to checkpoint'], ['DRAG', 'look around'], ['WHEEL', 'zoom']],
+    keys: touch ? [['STICK', 'aim'], ['HOP', 'hold to charge, release to hop'], ['R', 'back to checkpoint'], ['DRAG', 'look around'], ['MENU', 'pause, or leave']]
+      : [['WASD', 'aim'], ['SPACE', 'hold to charge, release to hop'], ['R', 'back to checkpoint'], ['DRAG', 'look around'], ['WHEEL', 'zoom'], ['ESC', 'pause, or leave']],
   },
   {
     focus: 'voxxy', tag: 'VOXXY · PRECISION THROW', title: 'VOXXY THROWS. ACCURATELY.',

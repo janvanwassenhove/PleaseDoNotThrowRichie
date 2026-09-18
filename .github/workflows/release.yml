@@ -193,6 +193,8 @@ jobs:
             echo
             echo "![The briefing]($DL/11-briefing.png)"
             echo
+            echo "![On a phone]($DL/12-phone.png)"
+            echo
             echo "![Grand finale]($DL/09-finale.png)"
             echo
             echo "![Keynote ready]($DL/10-keynote.png)"
