@@ -198,24 +198,40 @@ export function seatedAudience(seats: {x: number; y: number; z: number}[], seed 
   return mesh;
 }
 
-/** Standing crowd with arms in the air, merged per cluster so each cluster can sway. */
+/** The standing crowd at the front. They wait politely — a keynote, not a gig — until
+ *  Richie lands on them; then the arms go up and the bouncing starts. Each cluster is two
+ *  merged meshes (calm and hyped) so swapping them costs nothing. */
 export function cheeringCrowd(spots: {x: number; y: number; z: number}[], seed = 11) {
-  const r = rng(seed), group = new T.Group(), clusters: T.Mesh[] = [];
+  const group = new T.Group(), clusters: {calm: T.Mesh; hype: T.Mesh}[] = [];
   const perCluster = Math.max(1, Math.ceil(spots.length / 4));
   for (let c = 0; c < spots.length; c += perCluster) {
-    const parts: T.BufferGeometry[] = [];
-    spots.slice(c, c + perCluster).forEach((sp, i) => {
-      const s = spec(seed * 131 + c + i);
-      const body = bodyGeo(s), legs = [legGeo(s, -1), legGeo(s, 1)], arms = [armGeo(s, -1), armGeo(s, 1)];
-      legs.forEach((l, k) => at(l, k ? .11 : -.11, 1.05, 0));
-      arms.forEach((a, k) => at(a, (k ? .27 : -.27) * s.wide, 1.78, 0, Math.PI - .35, 0, (k ? -.4 : .4)));
-      const g = mergeGeometries([body, ...legs, ...arms], false)!;
-      at(g, sp.x, sp.y, sp.z, 0, Math.PI + (r() - .5) * .6, 0, s.height);
-      parts.push(g);
-    });
-    const m = new T.Mesh(mergeGeometries(parts, false)!, peopleMaterial);
-    m.castShadow = true;
-    group.add(m); clusters.push(m);
+    const build = (hyped: boolean) => {
+      const r = rng(seed + c), parts: T.BufferGeometry[] = [];
+      spots.slice(c, c + perCluster).forEach((sp, i) => {
+        const s = spec(seed * 131 + c + i), yaw = Math.PI + (r() - .5) * .6;
+        const body = bodyGeo(s), legs = [legGeo(s, -1), legGeo(s, 1)], arms = [armGeo(s, -1), armGeo(s, 1)];
+        legs.forEach((l, k) => at(l, k ? .11 : -.11, 1.05, 0));
+        // Calm: arms down, one maybe holding a phone up to film the stage. Hyped: both up.
+        arms.forEach((a, k) => hyped ? at(a, (k ? .27 : -.27) * s.wide, 1.78, 0, Math.PI - .35, 0, (k ? -.4 : .4))
+          : at(a, (k ? .27 : -.27) * s.wide, 1.78, 0, k && s.phone ? -2.6 : (r() - .5) * .15, 0, (k ? -.08 : .08)));
+        const g = mergeGeometries([body, ...legs, ...arms], false)!;
+        at(g, sp.x, sp.y, sp.z, 0, yaw, 0, s.height);
+        parts.push(g);
+      });
+      const m = new T.Mesh(mergeGeometries(parts, false)!, peopleMaterial);
+      m.castShadow = true;
+      group.add(m);
+      return m;
+    };
+    clusters.push({calm: build(false), hype: build(true)});
   }
-  return {group, update(t: number, excitement = 0) { clusters.forEach((m, i) => { m.position.y = Math.abs(Math.sin(t * 2.4 + i)) * (.05 + excitement * .25); m.rotation.z = Math.sin(t * 1.6 + i * 1.3) * .02; }); }};
+  return {group, update(t: number, excitement = 0) {
+    const hyped = excitement > .05;
+    clusters.forEach(({calm, hype}, i) => {
+      calm.visible = !hyped; hype.visible = hyped;
+      const m = hyped ? hype : calm;
+      m.position.y = hyped ? Math.abs(Math.sin(t * 2.4 + i)) * (.05 + Math.min(1, excitement) * .25) : 0;
+      m.rotation.z = Math.sin(t * (hyped ? 1.6 : .5) + i * 1.3) * (hyped ? .02 : .006);
+    });
+  }};
 }

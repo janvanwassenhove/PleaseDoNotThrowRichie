@@ -95,17 +95,25 @@ try {
   await settle(page, 700);
   await shot(page, '07-auditorium');
 
-  // End card, with a plausible run behind it and the stage as the backdrop.
-  await drive(page, 'warp', 7);
-  await settle(page);
-  await drive(page, 'camera', 0, 0.3, 14);
+  // The grand finale: Richie makes the stage and the whole expedition joins him.
   await drive(page, 'set', {
     tokens: 6,
     stats: {time: 214, hops: 143, faceplants: 27, throws: 4, impacts: 3, stairs: 9, coffees: 5, croissants: 2},
   });
-  await drive(page, 'results');
-  await settle(page, 600);
-  await shot(page, '08-keynote');
+  await drive(page, 'finale');
+  await page.waitForFunction(() => window.__richie.state === 'end', null, {timeout: 15_000});
+  // Give the robots time to run in from the wings; the party camera is already sweeping.
+  await page.waitForFunction(() => {
+    const r = window.__richie.robots;
+    return r.every(([x]) => Math.abs(x) < 6);
+  }, null, {timeout: 30_000});
+  await settle(page, 800);
+  await shot(page, '08-finale');
+
+  // End card over the party.
+  await page.waitForFunction(() => window.__richie.state === 'results', null, {timeout: 30_000});
+  await settle(page, 800);
+  await shot(page, '09-keynote');
 
   if (errors.length) throw new Error(`the page reported errors:\n  ${errors.join('\n  ')}`);
   console.log(`\nWrote screenshots to ${OUT}/`);

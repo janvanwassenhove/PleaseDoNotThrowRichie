@@ -178,9 +178,9 @@ jobs:
             echo "| ![Exhibition floor]($DL/03-exhibition.png) | ![Voxxy]($DL/04-voxxy.png) |"
             echo "| ![Grand staircase]($DL/05-staircase.png) | ![Cinema corridor]($DL/06-corridor.png) |"
             echo
-            echo "![Auditorium 8]($DL/07-auditorium.png)"
+            echo "| ![Auditorium 8]($DL/07-auditorium.png) | ![Grand finale]($DL/08-finale.png) |"
             echo
-            echo "![Keynote ready]($DL/08-keynote.png)"
+            echo "![Keynote ready]($DL/09-keynote.png)"
             echo
             echo "## What's changed"
             echo
