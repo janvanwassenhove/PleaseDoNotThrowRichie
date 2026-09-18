@@ -12,7 +12,7 @@ on:
   workflow_dispatch:
     inputs:
       ref:
-        description: Git ref to build and publish (default: the ref the run is on)
+        description: "Git ref to build and publish (default: the ref the run is on)"
         required: false
 
 permissions:
