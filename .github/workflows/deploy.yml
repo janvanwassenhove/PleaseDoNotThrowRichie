@@ -1,13 +1,19 @@
 name: Deploy to GitHub Pages
 
 # Pushes to main publish the current tip. release.yml then dispatches this workflow
-# at the tag it just cut, so the live site's version badge matches the newest release
-# rather than the commit before the version bump. (A `release: published` trigger
-# would not do: GitHub does not raise events for releases that GITHUB_TOKEN creates.)
+# on main with the tag it just cut as `ref`, so the live site's version badge matches
+# the newest release rather than the commit before the version bump. The dispatch has
+# to run on main: the github-pages environment only admits the default branch, so a
+# run on the tag itself is refused at the deploy job. (A `release: published` trigger
+# would not do either: GitHub raises no events for releases that GITHUB_TOKEN creates.)
 on:
   push:
     branches: [main]
   workflow_dispatch:
+    inputs:
+      ref:
+        description: "Git ref to build and publish (default: the ref the run is on)"
+        required: false
 
 permissions:
   contents: read
@@ -23,6 +29,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref || github.ref }}
       - uses: actions/setup-node@v4
         with: {node-version: 24, cache: npm}
       - run: npm ci
