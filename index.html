@@ -1,1 +1,49 @@
-<!doctype html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Please Do Not Throw Richie</title></head><body><div id="app"></div><script type="module" src="/src/main.ts"></script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Please Do Not Throw Richie</title>
+<meta name="description" content="An irresponsible Devoxx physics game. Richie has a keynote. Richie has no legs. Hop, bounce and get thrown from registration to the keynote stage.">
+<meta name="theme-color" content="#0d1c27">
+<meta property="og:title" content="Please Do Not Throw Richie">
+<meta property="og:description" content="Richie has a keynote. Richie has no legs. Gravity is about to become a team sport.">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%230d1c27'/><path d='M10 5v8M22 5v8' stroke='%23ffbd5c' stroke-width='2'/><ellipse cx='16' cy='17' rx='9' ry='6' fill='%23f2f4ef'/><rect x='10' y='18' width='12' height='7' rx='2' fill='%23e9ebe6'/></svg>">
+</head>
+<body>
+<div id="app"></div>
+<!-- Shown until main.ts has a running render loop, and rewritten in place if the
+     boot fails. Without it a WebGL or WASM failure is an unexplained black page. -->
+<div id="boot"><div><b>PLEASE DO NOT THROW RICHIE.</b><span id="bootMsg">WAKING RICHIE…</span></div></div>
+<noscript><div id="boot"><div><b>PLEASE DO NOT THROW RICHIE.</b><span>This game needs JavaScript. Richie needs it more than you do.</span></div></div></noscript>
+<script>
+// Richie's physics is WebAssembly and his venue is WebGL; either can be missing or
+// blocked. Turn the silent failure into something a visitor can act on.
+(function () {
+  var done = false;
+  function fail(detail) {
+    if (done) return; done = true;
+    var box = document.getElementById('boot'); if (!box) return;
+    var webgl = false;
+    try { webgl = !!document.createElement('canvas').getContext('webgl2'); } catch (e) { /* blocked */ }
+    box.hidden = false;
+    box.className = 'failed';
+    box.innerHTML = '<div><b>RICHIE DID NOT MAKE IT.</b><span>' + (webgl
+      ? 'The game failed to start. Reload the page, and if it keeps happening please report it with the detail below.'
+      : 'This browser has no usable WebGL 2. Try a recent desktop Chrome, Edge, Firefox or Safari with hardware acceleration enabled.')
+      + '</span><code>' + String(detail).slice(0, 300).replace(/[<&]/g, ' ') + '</code>'
+      + '<a class="btn" href="https://github.com/janvanwassenhove/PleaseDoNotThrowRichie/issues">REPORT IT ↗</a></div>';
+  }
+  addEventListener('error', function (e) {
+    if (e.target && e.target.tagName === 'SCRIPT') fail('The game script failed to load.');
+    else if (e.message) fail(e.message);
+  }, true);
+  addEventListener('unhandledrejection', function (e) { fail((e.reason && e.reason.message) || e.reason); });
+  // A module that never evaluates (blocked script, failed chunk) reports nothing at all.
+  setTimeout(function () { if (document.getElementById('boot')) fail('Timed out while starting.'); }, 30000);
+})();
+</script>
+<script type="module" src="/src/main.ts"></script>
+</body>
+</html>
