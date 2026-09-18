@@ -11,9 +11,11 @@ name: Release
 # cannot re-trigger this workflow. The commit also carries [skip ci] and the
 # `chore(release):` guard below, in case a PAT is ever wired up here.
 #
-# The last job dispatches deploy.yml at the new tag, so the live site on GitHub
-# Pages carries the version this run just cut. (GitHub raises no events for the
-# release or the tag, because GITHUB_TOKEN created them, so it has to be explicit.)
+# The last job dispatches deploy.yml on main with the new tag as its `ref` input, so
+# the live site on GitHub Pages carries the version this run just cut. (GitHub raises
+# no events for the release or the tag, because GITHUB_TOKEN created them, so it has
+# to be explicit; and the github-pages environment admits only main, so the run
+# itself cannot be on the tag.)
 on:
   push:
     branches: [main]
@@ -213,4 +215,4 @@ jobs:
       - env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAG: ${{ needs.prepare.outputs.tag }}
-        run: gh workflow run deploy.yml --repo "$GITHUB_REPOSITORY" --ref "$TAG"
+        run: gh workflow run deploy.yml --repo "$GITHUB_REPOSITORY" --ref main -f "ref=$TAG"
