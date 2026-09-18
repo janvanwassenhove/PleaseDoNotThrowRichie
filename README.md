@@ -19,6 +19,8 @@ The game is a static site: no backend, no account, no physical robot. Every rele
 | Orbit / zoom the camera | Drag / scroll |
 | Skip the opening | `SPACE`, `ENTER`, `E` or a tap |
 
+**Mind security.** Four guards patrol the exhibition hall, the foyer and the corridor; the yellow cone on the floor is what they see. Get spotted and it turns red and they give chase — caught, and you are hoisted overhead and thrown back to the previous checkpoint. Hop over their heads, break line of sight behind a booth, or let Voxxy and Biggy carry you past.
+
 On a phone or tablet the controls are on screen: a stick to aim, **HOP** (hold to charge, let go to jump), **E** and **R**. Landscape works best. The game is a PWA — *Add to Home Screen* installs it, and after one visit it runs offline. WebGL 2 is required; if it is missing or blocked, the page says so instead of going black.
 
 ## Run it locally

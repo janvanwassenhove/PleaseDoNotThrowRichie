@@ -73,6 +73,12 @@ try {
   await settle(page, 400);
   await shot(page, '04-voxxy');
 
+  // Security: a guard has just spotted Richie on the exhibition floor.
+  await drive(page, 'alarm');
+  await drive(page, 'camera', 0.6, 0.25, 9);
+  await page.waitForFunction(() => ['alert', 'chase'].includes(window.__richie.guards[1][0]), null, {timeout: SLOW});
+  await shot(page, '05-security');
+
   // The grand staircase: twenty-four steps, no legs.
   await drive(page, 'warp', 3);
   await settle(page);
@@ -82,7 +88,7 @@ try {
   // Wait on Richie's actual height, not on a timer: a software renderer's frame
   // rate is nobody's guess.
   await page.waitForFunction(() => window.__richie.pose().y > 2, null, {timeout: SLOW});
-  await shot(page, '05-staircase');
+  await shot(page, '06-staircase');
 
   // Cinema corridor, lined with Voxxy and Droid, the auditorium dead ahead.
   await drive(page, 'warp', 5);
@@ -91,14 +97,14 @@ try {
   await settle(page, 400);
   await drive(page, 'hop', 1);
   await page.waitForFunction(() => window.__richie.pose().y > 15, null, {timeout: SLOW});
-  await shot(page, '06-corridor');
+  await shot(page, '07-corridor');
 
   // Auditorium 8 from the doors at the top: the room rakes down to the keynote stage.
   await drive(page, 'warp', 6);
   await settle(page);
   await drive(page, 'look', 0, 16.5, 184, 0, 8, 256);
   await settle(page, 700);
-  await shot(page, '07-auditorium');
+  await shot(page, '08-auditorium');
 
   // The grand finale: Richie makes the stage and the whole expedition joins him.
   await drive(page, 'set', {
@@ -113,12 +119,12 @@ try {
     return r.every(([x]) => Math.abs(x) < 6);
   }, null, {timeout: SLOW});
   await settle(page, 800);
-  await shot(page, '08-finale');
+  await shot(page, '09-finale');
 
   // End card over the party.
   await page.waitForFunction(() => window.__richie.state === 'results', null, {timeout: SLOW});
   await settle(page, 800);
-  await shot(page, '09-keynote');
+  await shot(page, '10-keynote');
 
   if (errors.length) throw new Error(`the page reported errors:\n  ${errors.join('\n  ')}`);
   console.log(`\nWrote screenshots to ${OUT}/`);

@@ -235,3 +235,163 @@ export function cheeringCrowd(spots: {x: number; y: number; z: number}[], seed =
     });
   }};
 }
+
+// ------------------------------------------------------------------ security
+/** What a guard needs to know about Richie each frame. */
+export type Quarry = {pos: T.Vector3; catchable: boolean; canSee: (eye: T.Vector3, target: T.Vector3) => boolean};
+export type GuardEvent = 'spotted' | 'grabbed' | 'thrown' | 'lost' | null;
+
+/** Kinepolis security: patrols a loop, sees a cone in front, and does not like robots.
+ *  Spot Richie and the guard gives chase; get caught and he hoists Richie overhead and
+ *  throws him back. The cone is drawn on the floor so the player can plan around it. */
+export class Guard {
+  group = new T.Group();
+  state: 'patrol' | 'alert' | 'chase' | 'grab' | 'throw' | 'return' = 'patrol';
+  speed = 1.25;
+  chaseSpeed = 3.3;
+  range = 9;
+  fov = .7; // half-angle, radians
+  /** Where a held Richie sits: overhead. */
+  readonly hands = new T.Vector3();
+  private cone: T.Mesh;
+  private bang: T.Sprite;
+  private limbs: T.Mesh[];
+  private phase = 0;
+  private moving = 0;
+  private wp = 0;
+  private pause = 0;
+  private yaw = 0;
+  private timer = 0;
+  private lastSeen = new T.Vector3();
+  private unseen = 0;
+  private cooldown = 0;
+  private home: T.Vector3;
+  private homeYaw: number;
+
+  constructor(seed: number, public waypoints: T.Vector3[]) {
+    const s = spec(seed);
+    Object.assign(s, {top: 0x15181d, pants: 0x15181d, shoes: 0x111111, hoodie: false, hood: false, cap: true, badge: false, backpack: false, coffee: false, laptop: false, phone: false, text: null, hairStyle: 'short', height: 1.02 + s.r() * .08, wide: 1.05 + s.r() * .15});
+    const body = new T.Mesh(bodyGeo(s), peopleMaterial);
+    body.castShadow = true;
+    this.group.add(body);
+    // SECURITY across the chest and the back, a radio on the shoulder, an earpiece.
+    for (const [z, ry] of [[.148, 0], [-.148, Math.PI]] as const) {
+      const tag = new T.Mesh(new T.PlaneGeometry(.34, .34), shirtMaterial('SECURITY'));
+      tag.position.set(0, 1.56, z); tag.rotation.y = ry; body.add(tag);
+    }
+    const radio = new T.Mesh(new T.BoxGeometry(.07, .12, .05), new T.MeshStandardMaterial({color: 0x222222, roughness: .6}));
+    radio.position.set(.2, 1.78, .12); body.add(radio);
+    const ear = new T.Mesh(new T.SphereGeometry(.025, 6, 6), new T.MeshStandardMaterial({color: 0xdddddd}));
+    ear.position.set(.17, 2.06, .02); body.add(ear);
+    const limb = (geo: T.BufferGeometry, x: number, y: number) => { const m = new T.Mesh(geo, peopleMaterial); m.position.set(x, y, 0); m.castShadow = true; this.group.add(m); return m; };
+    this.limbs = [limb(armGeo(s, -1), -.27 * s.wide, 1.78), limb(armGeo(s, 1), .27 * s.wide, 1.78), limb(legGeo(s, -1), -.11, 1.05), limb(legGeo(s, 1), .11, 1.05)];
+    // The vision cone, flat on the floor, pointing the way the guard faces (+Z).
+    this.cone = new T.Mesh(new T.CircleGeometry(this.range, 28, -Math.PI / 2 - this.fov, this.fov * 2),
+      new T.MeshBasicMaterial({color: 0xffd25c, transparent: true, opacity: .16, depthWrite: false, side: T.DoubleSide}));
+    this.cone.rotation.x = -Math.PI / 2; this.cone.position.y = .06; this.group.add(this.cone);
+    // The "!" over the head when Richie is spotted.
+    const c = document.createElement('canvas'); c.width = c.height = 64; const g = c.getContext('2d')!;
+    g.fillStyle = '#ff4a3a'; g.font = 'bold 56px Arial'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('!', 32, 34);
+    const tex = new T.CanvasTexture(c); tex.colorSpace = T.SRGBColorSpace;
+    this.bang = new T.Sprite(new T.SpriteMaterial({map: tex, transparent: true, depthTest: false}));
+    this.bang.scale.setScalar(.7); this.bang.position.y = 2.75; this.bang.visible = false; this.group.add(this.bang);
+    this.group.scale.setScalar(s.height);
+    this.wp = Math.floor(s.r() * waypoints.length);
+    const start = waypoints[this.wp];
+    this.group.position.set(start.x, start.y, start.z);
+    this.yaw = s.r() * 6.28;
+    this.home = start.clone(); this.homeYaw = this.yaw;
+  }
+
+  /** Put the guard somewhere on purpose (the debug hook uses this to stage a catch). */
+  place(x: number, y: number, z: number, yaw: number) {
+    this.group.position.set(x, y, z); this.yaw = yaw; this.group.rotation.y = yaw; this.pause = 3;
+    return this;
+  }
+
+  reset() {
+    this.state = 'patrol'; this.timer = 0; this.cooldown = 0; this.unseen = 0; this.pause = 0;
+    this.group.position.copy(this.home); this.yaw = this.homeYaw; this.group.rotation.y = this.yaw;
+    this.bang.visible = false; this.tint(false);
+  }
+
+  private tint(alert: boolean) {
+    const m = this.cone.material as T.MeshBasicMaterial;
+    m.color.set(alert ? 0xff4a3a : 0xffd25c); m.opacity = alert ? .28 : .16;
+  }
+
+  private sees(q: Quarry) {
+    if (!q.catchable || this.cooldown > 0) return false;
+    const p = this.group.position, dx = q.pos.x - p.x, dz = q.pos.z - p.z, d = Math.hypot(dx, dz);
+    if (d > this.range || Math.abs(q.pos.y - p.y) > 4) return false;
+    const rel = Math.atan2(Math.sin(Math.atan2(dx, dz) - this.yaw), Math.cos(Math.atan2(dx, dz) - this.yaw));
+    if (Math.abs(rel) > this.fov) return false;
+    return q.canSee(new T.Vector3(p.x, p.y + 2, p.z), new T.Vector3(q.pos.x, q.pos.y + .3, q.pos.z));
+  }
+
+  private stepTo(x: number, z: number, speed: number, dt: number) {
+    const p = this.group.position, dx = x - p.x, dz = z - p.z, d = Math.hypot(dx, dz);
+    if (d < .05) return d;
+    const target = Math.atan2(dx, dz);
+    this.yaw += Math.atan2(Math.sin(target - this.yaw), Math.cos(target - this.yaw)) * Math.min(1, dt * 8);
+    const s = Math.min(speed * dt, d);
+    p.x += dx / d * s; p.z += dz / d * s;
+    return d - s;
+  }
+
+  update(dt: number, t: number, q: Quarry): GuardEvent {
+    const p = this.group.position;
+    let ev: GuardEvent = null, moving = 0;
+    this.cooldown = Math.max(0, this.cooldown - dt);
+    const seen = this.sees(q);
+    if (seen) { this.lastSeen.copy(q.pos); this.unseen = 0; } else this.unseen += dt;
+
+    switch (this.state) {
+      case 'patrol':
+      case 'return': {
+        if (seen) { this.state = 'alert'; this.timer = .45; this.bang.visible = true; this.tint(true); ev = 'spotted'; break; }
+        if (this.pause > 0) { this.pause -= dt; break; }
+        const w = this.waypoints[this.wp];
+        if (this.stepTo(w.x, w.z, this.speed, dt) < .3) { this.wp = (this.wp + 1) % this.waypoints.length; this.pause = .5 + Math.random() * 2.5; this.state = 'patrol'; }
+        else moving = 1;
+        break;
+      }
+      case 'alert': { // a beat of "HEY!" before the running starts
+        this.timer -= dt;
+        const dx = q.pos.x - p.x, dz = q.pos.z - p.z, target = Math.atan2(dx, dz);
+        this.yaw += Math.atan2(Math.sin(target - this.yaw), Math.cos(target - this.yaw)) * Math.min(1, dt * 10);
+        if (this.timer <= 0) this.state = 'chase';
+        break;
+      }
+      case 'chase': {
+        if (this.unseen > 5) { this.state = 'return'; this.bang.visible = false; this.tint(false); ev = 'lost'; break; }
+        const goal = seen ? q.pos : this.lastSeen;
+        const d = this.stepTo(goal.x, goal.z, this.chaseSpeed, dt);
+        moving = 1;
+        if (seen && d < 1.3 && Math.abs(q.pos.y - p.y) < 1.7) { this.state = 'grab'; this.timer = 1.0; ev = 'grabbed'; }
+        break;
+      }
+      case 'grab': { // hoist and hold: Richie sits in `hands`
+        this.timer -= dt;
+        if (this.timer <= 0) { this.state = 'throw'; this.timer = .35; ev = 'thrown'; }
+        break;
+      }
+      case 'throw': {
+        this.timer -= dt;
+        if (this.timer <= 0) { this.state = 'return'; this.cooldown = 4; this.bang.visible = false; this.tint(false); }
+        break;
+      }
+    }
+    this.group.rotation.y = this.yaw;
+    this.hands.set(p.x - Math.sin(this.yaw) * .2, p.y + 2.7, p.z + Math.cos(this.yaw) * .2);
+    this.moving += (moving - this.moving) * Math.min(1, dt * 8);
+    this.phase += dt * (this.state === 'chase' ? 12 : 7.5) * this.moving;
+    const [aL, aR, lL, lR] = this.limbs, ph = this.phase, m = this.moving, holding = this.state === 'grab' || this.state === 'throw';
+    lL.rotation.x = Math.sin(ph) * .6 * m; lR.rotation.x = -Math.sin(ph) * .6 * m;
+    // Arms: pump while running, straight up while holding Richie, swinging through on the throw.
+    const armUp = holding ? (this.state === 'throw' ? Math.PI - .2 + (.35 - this.timer) * 3 : Math.PI - .25) : 0;
+    aL.rotation.x = holding ? armUp : -Math.sin(ph) * .5 * m; aR.rotation.x = holding ? armUp : Math.sin(ph) * .5 * m;
+    this.bang.position.y = 2.75 + Math.sin(t * 8) * .05;
+    return ev;
+  }
+}
