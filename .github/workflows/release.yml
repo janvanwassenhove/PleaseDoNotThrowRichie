@@ -188,11 +188,12 @@ jobs:
             echo "| --- | --- |"
             echo "| ![Title]($DL/01-title.png) | ![Opening]($DL/02-opening.png) |"
             echo "| ![Exhibition floor]($DL/03-exhibition.png) | ![Voxxy]($DL/04-voxxy.png) |"
-            echo "| ![Grand staircase]($DL/05-staircase.png) | ![Cinema corridor]($DL/06-corridor.png) |"
+            echo "| ![Security]($DL/05-security.png) | ![Grand staircase]($DL/06-staircase.png) |"
+            echo "| ![Cinema corridor]($DL/07-corridor.png) | ![Auditorium 8]($DL/08-auditorium.png) |"
             echo
-            echo "| ![Auditorium 8]($DL/07-auditorium.png) | ![Grand finale]($DL/08-finale.png) |"
+            echo "![Grand finale]($DL/09-finale.png)"
             echo
-            echo "![Keynote ready]($DL/09-keynote.png)"
+            echo "![Keynote ready]($DL/10-keynote.png)"
             echo
             echo "## What's changed"
             echo
