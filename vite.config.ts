@@ -14,7 +14,7 @@ export default defineConfig({
   build: {chunkSizeWarningLimit: 3000},
   plugins: [
     // Installable, offline-capable: the whole game is a static site, so the service
-    // worker precaches every build asset (the physics wasm and Richie's GLB included).
+    // worker precaches every build asset (the physics wasm, Richie's GLB and the textures included).
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg', 'icons/*.png'],
@@ -35,7 +35,7 @@ export default defineConfig({
         ],
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,glb,wasm,png,svg,webmanifest}'],
+        globPatterns: ['**/*.{js,css,html,glb,wasm,png,jpg,svg,webmanifest}'],
         maximumFileSizeToCacheInBytes: 6 * 1024 * 1024,
       },
     }),
