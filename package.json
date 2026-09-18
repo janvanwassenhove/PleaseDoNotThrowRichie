@@ -1,7 +1,7 @@
 {
   "name": "please-do-not-throw-richie",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.0.1",
   "type": "module",
   "description": "An irresponsible Devoxx physics game. Richie has a keynote. Richie has no legs.",
   "author": "Jan Van Wassenhove <vanwassenhove.jan@gmail.com>",
