@@ -43,6 +43,18 @@ npm run screenshots               # writes screenshots/*.png
 
 `scripts/screenshots.mjs` boots a real Vite server and drives the game through the `window.__richie` debug hook in `src/main.ts` rather than synthesising input, so captures are deterministic. On a machine that already has a Chromium build, point `CHROMIUM_PATH` at it instead of installing another one.
 
+## Richie's model
+
+Richie is the official [Reachy Mini](https://github.com/pollen-robotics/reachy_mini) geometry (Apache-2.0, see `src/assets/NOTICE-reachy-mini.md`), converted to `src/assets/richie.glb`. To regenerate it:
+
+```sh
+pip install numpy scipy trimesh fast-simplification
+pip download reachy-mini --no-deps -d /tmp/rm && (cd /tmp/rm && unzip -q *.whl)
+python3 scripts/build-richie.py /tmp/rm/reachy_mini/descriptions/reachy_mini/mjcf src/assets/richie.glb
+```
+
+The wheel, not the git checkout: the repository keeps its STLs in Git LFS. Voxxy, Droid, Biggy and the venue are procedural, built to the [Robot Games references](https://game.devoxx.be/references.html) — see [asset sources](docs/ASSET-SOURCES.md).
+
 ## Deployment and releases
 
 Three workflows, all in `.github/workflows/`:

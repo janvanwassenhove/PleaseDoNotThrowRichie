@@ -55,7 +55,7 @@ try {
   // Exhibition floor, hop charged: the core loop in one frame.
   await drive(page, 'warp', 1);
   await settle(page);                          // let Richie land before framing him
-  await drive(page, 'camera', -0.3, 0.3, 10);  // snaps the chase camera into place
+  await drive(page, 'camera', -0.3, 0.3, 7);  // snaps the chase camera into place
   await settle(page, 400);
   await drive(page, 'charging', 0.75);
   await settle(page, 300);
@@ -64,14 +64,14 @@ try {
   // The Voxxy gap, where the title stops being a request.
   await drive(page, 'warp', 2);
   await settle(page);
-  await drive(page, 'camera', -0.35, 0.28, 11);
+  await drive(page, 'camera', -0.35, 0.26, 8);
   await settle(page, 400);
   await shot(page, '04-voxxy');
 
   // The grand staircase: twenty-four steps, no legs.
   await drive(page, 'warp', 3);
   await settle(page);
-  await drive(page, 'camera', 0, 0.25, 12);
+  await drive(page, 'camera', 0, 0.25, 9);
   await settle(page, 400);
   await drive(page, 'hop', 1);
   // Wait on Richie's actual height, not on a timer: a software renderer's frame
@@ -82,7 +82,7 @@ try {
   // Cinema corridor, lined with Voxxy and Droid, the auditorium dead ahead.
   await drive(page, 'warp', 5);
   await settle(page);
-  await drive(page, 'camera', 0.2, 0.28, 10);
+  await drive(page, 'camera', 0.2, 0.26, 7.5);
   await settle(page, 400);
   await drive(page, 'hop', 1);
   await page.waitForFunction(() => window.__richie.pose().y > 15, null, {timeout: 15_000});
