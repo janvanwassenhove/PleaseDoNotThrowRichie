@@ -1,0 +1,203 @@
+name: Release
+
+# Every push to main cuts a patch release: the workflow bumps package.json, tags it,
+# captures gameplay screenshots, packages the built static site and publishes a
+# GitHub Release with an auto-generated changelog.
+#
+# Use the manual "Run workflow" button for a minor/major bump instead.
+#
+# Loop safety: the version-bump commit is pushed with the default GITHUB_TOKEN, and
+# GitHub deliberately does NOT trigger workflows from GITHUB_TOKEN pushes, so it
+# cannot re-trigger this workflow. The commit also carries [skip ci] and the
+# `chore(release):` guard below, in case a PAT is ever wired up here.
+#
+# Publishing the release triggers deploy.yml at the new tag, so the live site on
+# GitHub Pages carries the version this run just cut.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: Version bump
+        type: choice
+        default: patch
+        options: [patch, minor, major]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-main
+  cancel-in-progress: false # never abandon a half-published release
+
+jobs:
+  # -------------------------------------------- test, bump the version, tag it
+  prepare:
+    name: Test, bump & tag
+    runs-on: ubuntu-latest
+    # Skip the bump commit itself, and let a human opt out with [skip release].
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (!startsWith(github.event.head_commit.message, 'chore(release):') &&
+       !contains(github.event.head_commit.message, '[skip release]'))
+    outputs:
+      version: ${{ steps.bump.outputs.version }}
+      tag: ${{ steps.bump.outputs.tag }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main # release the current tip of main, not a stale SHA
+          fetch-depth: 0 # full history for the changelog
+      - uses: actions/setup-node@v4
+        with: {node-version: 24, cache: npm}
+      - run: npm ci
+      - run: npm test
+
+      - name: Bump, commit and tag
+        id: bump
+        run: |
+          set -euo pipefail
+          git config user.name  'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          LEVEL='${{ github.event.inputs.bump || 'patch' }}'
+          # npm version updates package.json + lockfile, commits and tags v<x>.
+          # tail -n1 guards against npm printing notices before the version line.
+          TAG="$(npm version "$LEVEL" -m 'chore(release): %s [skip ci]' | tail -n1)"
+          echo "version=${TAG#v}" >> "$GITHUB_OUTPUT"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          git push --follow-tags origin HEAD:main
+
+  # ------------------------------------------------------------- screenshots
+  screenshots:
+    name: Capture screenshots
+    needs: prepare
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.prepare.outputs.tag }}
+      - uses: actions/setup-node@v4
+        with: {node-version: 24, cache: npm}
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run screenshots
+      # A hand-off to the publish job in the same run; the shots end up in the notes.
+      - uses: actions/upload-artifact@v4
+        with:
+          name: screenshots
+          path: screenshots/
+          if-no-files-found: error
+          retention-days: 1
+
+  # --------------------------------------------------------- the playable build
+  # The game is a static site, so the release asset is the built site itself: one
+  # zip anyone can drop on a web server, and the exact bytes behind the tag.
+  site:
+    name: Package the static site
+    needs: prepare
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.prepare.outputs.tag }}
+      - uses: actions/setup-node@v4
+        with: {node-version: 24, cache: npm}
+      - run: npm ci
+      - run: npm run build
+      - name: Zip it
+        run: |
+          set -euo pipefail
+          mkdir -p out
+          (cd dist && zip -qr "../out/PleaseDoNotThrowRichie-${{ needs.prepare.outputs.version }}-web.zip" .)
+      - uses: actions/upload-artifact@v4
+        with:
+          name: site
+          path: out/
+          if-no-files-found: error
+          retention-days: 1
+
+  # ------------------------------------------------------------ release notes
+  publish:
+    name: Compose notes & publish
+    needs: [prepare, screenshots, site]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.prepare.outputs.tag }}
+          fetch-depth: 0 # full history so we can diff against the last tag
+
+      # Pull every artifact (screenshots + the zipped site) into ./artifacts/*.
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Compose release notes
+        shell: bash
+        env:
+          TAG: ${{ needs.prepare.outputs.tag }}
+          VERSION: ${{ needs.prepare.outputs.version }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          DL="https://github.com/$REPO/releases/download/$TAG"
+          ZIP="PleaseDoNotThrowRichie-$VERSION-web.zip"
+
+          # Commits since the previous tag (or the whole history for the first release).
+          PREV="$(git describe --tags --abbrev=0 "$TAG^" 2>/dev/null || echo '')"
+          if [ -n "$PREV" ]; then RANGE="$PREV..$TAG"; else RANGE="$TAG"; fi
+
+          {
+            echo "**Please Do Not Throw Richie $TAG** — an irresponsible Devoxx physics game."
+            echo "Richie has a keynote. Richie has no legs. Get him from registration to the keynote"
+            echo "stage on hops alone, with help from Voxxy, Droid, Biggy and an audience that should"
+            echo "know better."
+            echo
+            echo "▶ **Play in your browser:** https://janvanwassenhove.github.io/PleaseDoNotThrowRichie/"
+            echo
+            echo "## Download"
+            echo
+            echo "| What | File |"
+            echo "| --- | --- |"
+            echo "| The playable build, as a static site | [\`$ZIP\`]($DL/$ZIP) |"
+            echo
+            echo "Unzip it and serve the folder over HTTP — it is plain static files with no backend,"
+            echo "and it works from a subpath. Opening \`index.html\` straight off disk does not work:"
+            echo "ES modules and the physics WebAssembly need an HTTP origin."
+            echo
+            echo "## Screenshots"
+            echo
+            echo "| The pitch | The problem |"
+            echo "| --- | --- |"
+            echo "| ![Title]($DL/01-title.png) | ![Opening]($DL/02-opening.png) |"
+            echo "| ![Exhibition floor]($DL/03-exhibition.png) | ![Voxxy]($DL/04-voxxy.png) |"
+            echo "| ![Grand staircase]($DL/05-staircase.png) | ![Cinema corridor]($DL/06-corridor.png) |"
+            echo
+            echo "![Keynote ready]($DL/07-keynote.png)"
+            echo
+            echo "## What's changed"
+            echo
+            git log --no-merges --pretty=format:'- %s' "$RANGE" | grep -v '^- chore(release):' || echo "- Initial release"
+            echo
+            echo
+            if [ -n "$PREV" ]; then
+              echo "**Full changelog:** https://github.com/$REPO/compare/$PREV...$TAG"
+            fi
+          } > notes.md
+
+          echo "--- notes.md ---"; cat notes.md
+
+      - name: Create the release and upload every asset
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ needs.prepare.outputs.tag }}
+        run: |
+          set -euo pipefail
+          mapfile -t FILES < <(find artifacts -type f \( -name '*.zip' -o -name '*.png' \) | sort)
+          printf 'attaching:\n'; printf '  %s\n' "${FILES[@]}"
+          gh release create "$TAG" \
+            --title "Please Do Not Throw Richie $TAG" \
+            --notes-file notes.md \
+            --latest \
+            "${FILES[@]}"
