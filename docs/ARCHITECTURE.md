@@ -4,7 +4,7 @@ The browser application uses TypeScript, Vite, Three.js and Rapier. A fixed 60 H
 
 Positive Z is progression. Registration and exhibition are at y=0, the staircase landing at y=6, and the cinema level at y=13. Auditorium 8 follows the Kinepolis plan: you come in at the top and the room rakes down to the stage over twelve stepped tiers of curved seat rows (each tier is a box collider, each seat block one more), with the front three tiers standing room and the stage at y=6.4. These measurements compress the venue into readable gameplay. Eight proximity checkpoints prevent long repetition.
 
-Richie moves only by physical hops. Space builds charge; release sets an upward and camera-relative directional velocity. Weak air impulses allow corrections. A downward ray detects ground while excluding Richie's collider. When tilted on the floor, recovery assistance returns the body upright after roughly one second.
+Richie moves only by physical hops. Space builds charge; release sets an upward and camera-relative directional velocity. His head rides a damped spring on the real neck pivot: holding Space pulls it down into the body in proportion to the charge, the hop kicks it up to a hard stop 50 mm (model units) above rest, and it settles within a second — the shell never leaves the body. Weak air impulses allow corrections. A downward ray detects ground while excluding Richie's collider. When tilted on the floor, recovery assistance returns the body upright after roughly one second.
 
 Voxxy holds Richie without gravity and releases a calculated ballistic velocity. Biggy converts charge into a higher assisted launch. Droid's third recline launches Richie over the auditorium route. Audience zones catch and relay him toward the stage.
 
