@@ -15,6 +15,10 @@ Asset: Voxxy, Droid, Biggy and the Kinepolis Antwerp journey. Source: the Robot 
 
 An earlier iteration could not reach the reference site and worked from its published descriptions; iteration 10 had the sheets open side by side with the game and rebuilt all three robots against them (Biggy, for one, had been a box on four legs).
 
+## The Devoxx logo
+
+Asset: `src/assets/devoxx-white.svg`, the official Devoxx wordmark (white, with the orange XX and its ™). Source: https://game.devoxx.be/branding/devoxx-white.svg, the vector the Robot Games site itself serves; https://devoxx.be/ carries the same mark only as a 175×53 PNG, too small for a wall. Licence: a trademark of Devoxx, used unmodified to identify the conference this game is an entry for and set in; it is not covered by this repository's MIT licence. Modified: no. At load it is given an intrinsic size (the file has none, and some browsers will not draw a sizeless SVG to a canvas) and drawn onto dark panels — on Devoxx orange the XX would disappear. Usage: the title-screen tag, the sign over the entrance, the reception desk, the hanging banners, the foyer wall and the keynote slide. Every one of those was the word DEVOXX set in Arial before.
+
 ## Generated textures
 
 Asset: the image textures under `src/assets/textures/`. Source: generated for this project with ChatGPT image generation (OpenAI), one prompt per image, in a single conversation on 2026-09-18; the prompts are recorded in `prompts/002-textures.md`. Licence: generated for this project by its author; no third-party photograph or texture library is involved. Modified: `scripts/import-texture.py` resizes each download, cross-fades tiling textures against a half-offset copy of themselves so opposite edges match, centre-crops posters to their frame, and cuts Duke out of his white background with a border flood-fill. Usage —
@@ -31,7 +35,7 @@ Asset: the image textures under `src/assets/textures/`. Source: generated for th
 | `metal-graphite.jpg` | scuffed graphite plating | Droid |
 | `booth-1.jpg` … `booth-6.jpg` | booth backdrops for six absurd exhibitors: ROBO-BARISTA 9000, DUKE'S GADGET LAB, RUBBER DUCK AI, TOAST-AS-A-SERVICE, SELF-DRIVING OFFICE CHAIR, NULLPOINTER DETECTOR | the six exhibition booths; four reappear as sponsor lightboxes in the foyer |
 | `duke.png` | Duke as a cardboard standee with a lanyard and springy antennas | one by every booth |
-| `keynote-screen.jpg` | the keynote title slide, with the three robots in silhouette | the screen in auditorium 8 |
+| `keynote-bg.jpg` | a text-free keynote backdrop: three robot silhouettes under an orange-to-magenta sky | the screen in auditorium 8, with the Devoxx logo and KEYNOTE set over it at runtime |
 
 Duke is the Java mascot, which Oracle released under the BSD licence (https://openjdk.org/projects/duke/). The generated standee came with a coffee-cup logo on its badge; that logo is a trademark, so the import step paints the badge over as a plain conference badge. Every texture is optional at runtime: a material whose image is missing falls back to a flat colour, and a booth without a poster sets its own name in type.
 

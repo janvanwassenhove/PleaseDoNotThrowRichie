@@ -191,6 +191,8 @@ jobs:
             echo "| ![Security]($DL/05-security.png) | ![Grand staircase]($DL/06-staircase.png) |"
             echo "| ![Cinema corridor]($DL/07-corridor.png) | ![Auditorium 8]($DL/08-auditorium.png) |"
             echo
+            echo "![The briefing]($DL/11-briefing.png)"
+            echo
             echo "![Grand finale]($DL/09-finale.png)"
             echo
             echo "![Keynote ready]($DL/10-keynote.png)"

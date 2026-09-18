@@ -11,6 +11,8 @@ let anisotropy = 8;
 
 export const setAnisotropy = (n: number) => { anisotropy = n; cache.forEach(t => { t.anisotropy = n; t.needsUpdate = true; }); };
 export const hasTex = (name: string) => byName.has(name);
+/** The image's URL, for the DOM: the briefing shows the posters it is talking about. */
+export const texUrl = (name: string) => byName.get(name);
 
 /** A colour map, tiled `rx` by `ry`. Clones share the image, so every repeat is cheap. */
 export function tex(name: string, rx = 1, ry = rx, srgb = true): T.Texture | null {
