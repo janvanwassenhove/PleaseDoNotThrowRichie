@@ -62,7 +62,7 @@ Three workflows, all in `.github/workflows/`:
 
 - **`ci.yml`** — tests and builds every push and pull request.
 - **`deploy.yml`** — publishes `dist/` to GitHub Pages on every push to `main`, and again when a release is published so the live version badge matches the newest release. Enable it once under *Settings → Pages → Build and deployment → Source: GitHub Actions*.
-- **`release.yml`** — every push to `main` cuts a patch release: it runs the tests, bumps `package.json`, tags it, captures the screenshots, zips the built site and publishes a GitHub Release with the screenshots, the zip and a changelog generated from the commits. Use the workflow's *Run workflow* button for a minor or major bump, or put `[skip release]` in a commit message to skip one.
+- **`release.yml`** — every push to `main` cuts a patch release: it runs the tests, captures the screenshots and zips the built site (both from a checkout bumped to the version it is becoming), and only then bumps `package.json` for real, tags it and publishes a GitHub Release with the screenshots, the zip and a changelog generated from the commits since the last published release. Nothing is tagged unless everything before it succeeded. Use the workflow's *Run workflow* button for a minor or major bump, or put `[skip release]` in a commit message to skip one.
 - **`tidy-artifacts.yml`** — weekly cleanup of leftover Actions artifacts.
 
 ## Documentation

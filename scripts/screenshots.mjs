@@ -18,8 +18,12 @@ const VIEWPORT = {width: 1280, height: 720};
 const settle = (page, ms = 1200) => page.waitForTimeout(ms);
 const drive = (page, fn, ...args) => page.evaluate(([f, a]) => window.__richie[f](...a), [fn, args]);
 
+// CI captures on a software renderer: a single frame can take seconds, so every wait,
+// and the screenshot itself (which waits for a frame), gets a generous budget.
+const SLOW = 180_000;
+
 async function shot(page, name) {
-  await page.screenshot({path: `${OUT}/${name}.png`});
+  await page.screenshot({path: `${OUT}/${name}.png`, timeout: SLOW});
   console.log(`  ✓ ${name}.png`);
 }
 
@@ -34,6 +38,7 @@ const browser = await chromium.launch({
   args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'],
 });
 const page = await browser.newPage({viewport: VIEWPORT, deviceScaleFactor: 1});
+page.setDefaultTimeout(SLOW);
 const errors = [];
 page.on('pageerror', (e) => errors.push(e.message));
 
@@ -43,7 +48,7 @@ try {
 
   // Rapier's wasm init and the first rendered frame both have to land before the
   // debug hook exists; the boot overlay removing itself is the signal.
-  await page.waitForFunction(() => window.__richie && !document.getElementById('boot'), null, {timeout: 60_000});
+  await page.waitForFunction(() => window.__richie && !document.getElementById('boot'), null, {timeout: SLOW});
   await settle(page);
   await shot(page, '01-title');
 
@@ -76,7 +81,7 @@ try {
   await drive(page, 'hop', 1);
   // Wait on Richie's actual height, not on a timer: a software renderer's frame
   // rate is nobody's guess.
-  await page.waitForFunction(() => window.__richie.pose().y > 2, null, {timeout: 15_000});
+  await page.waitForFunction(() => window.__richie.pose().y > 2, null, {timeout: SLOW});
   await shot(page, '05-staircase');
 
   // Cinema corridor, lined with Voxxy and Droid, the auditorium dead ahead.
@@ -85,7 +90,7 @@ try {
   await drive(page, 'camera', 0.2, 0.26, 7.5);
   await settle(page, 400);
   await drive(page, 'hop', 1);
-  await page.waitForFunction(() => window.__richie.pose().y > 15, null, {timeout: 15_000});
+  await page.waitForFunction(() => window.__richie.pose().y > 15, null, {timeout: SLOW});
   await shot(page, '06-corridor');
 
   // Auditorium 8 from the doors at the top: the room rakes down to the keynote stage.
@@ -101,17 +106,17 @@ try {
     stats: {time: 214, hops: 143, faceplants: 27, throws: 4, impacts: 3, stairs: 9, coffees: 5, croissants: 2},
   });
   await drive(page, 'finale');
-  await page.waitForFunction(() => window.__richie.state === 'end', null, {timeout: 15_000});
+  await page.waitForFunction(() => window.__richie.state === 'end', null, {timeout: SLOW});
   // Give the robots time to run in from the wings; the party camera is already sweeping.
   await page.waitForFunction(() => {
     const r = window.__richie.robots;
     return r.every(([x]) => Math.abs(x) < 6);
-  }, null, {timeout: 30_000});
+  }, null, {timeout: SLOW});
   await settle(page, 800);
   await shot(page, '08-finale');
 
   // End card over the party.
-  await page.waitForFunction(() => window.__richie.state === 'results', null, {timeout: 30_000});
+  await page.waitForFunction(() => window.__richie.state === 'results', null, {timeout: SLOW});
   await settle(page, 800);
   await shot(page, '09-keynote');
 
