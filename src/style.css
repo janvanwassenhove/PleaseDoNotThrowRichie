@@ -8,11 +8,13 @@
 .ad small{display:block;font-size:9px;letter-spacing:.18em;color:#ff7a3d}
 .ad b{display:block;font-size:22px;font-weight:900;letter-spacing:-.03em;margin:4px 0 2px}.ad b em{font-style:normal;color:#ffbd5c}
 .ad span{display:block;font-size:11px;color:#c1ced0}.ad span i{font-style:normal;font-weight:800;color:#ffbd5c;margin-left:6px}
-@media (max-width:760px),(max-height:460px){.ad{padding:8px 12px}.ad small,.ad span{display:none}.ad b{font-size:14px;margin:0}.ad b::after{content:' ↗';color:#ffbd5c}}
-.tnote{margin-top:18px;border:1px solid #6b5330;background:#2a2114;color:#ffd79a;padding:10px 14px;border-radius:5px;font-size:12px;line-height:1.5}
+/* On a phone it steps back to a quiet line of text: the game on screen is this one. */
+@media (max-width:760px),(max-height:460px){.ad{right:max(16px,env(safe-area-inset-right));bottom:max(30px,calc(env(safe-area-inset-bottom) + 26px));padding:0;border:0;background:none;backdrop-filter:none;color:#7f97a1}.ad:hover{transform:none}.ad small,.ad span{display:none}.ad b{font-size:10px;font-weight:700;letter-spacing:.14em;margin:0}.ad b::before{content:'ALSO PLAY ';font-weight:400}.ad b em{color:inherit}.ad b::after{content:' ↗'}}
 
 /* Touch controls: a stick to aim with on the left, the three actions on the right. Shown
    only on coarse-pointer devices; the keyboard legend hides in their favour. */
+/* Only while actually playing: the layer follows the HUD, and hides behind the pause and results panels. */
+#hud[hidden]~.touch-ui,.modal:not([hidden])~.touch-ui{display:none}
 .touch-ui{position:fixed;inset:0;z-index:3;pointer-events:none;touch-action:none;user-select:none;-webkit-user-select:none}
 .stick{position:absolute;left:max(24px,env(safe-area-inset-left));bottom:max(28px,env(safe-area-inset-bottom));width:132px;height:132px;border-radius:50%;background:#10232b99;border:1px solid #58727a;pointer-events:auto;touch-action:none}
 .stick i{position:absolute;left:50%;top:50%;width:56px;height:56px;margin:-28px 0 0 -28px;border-radius:50%;background:#ffbd5cd9;box-shadow:0 3px 10px #0008}
@@ -25,7 +27,7 @@
 .cinema{flex-direction:column;gap:10px}.cinema small{font:11px Arial,sans-serif;letter-spacing:.2em;color:#aec0c5;font-weight:400}
 body.touch .controls{display:none}body.touch .charge{bottom:150px;right:20px;width:160px}body.touch .hint{bottom:150px}
 @media (max-width:760px){h1{font-size:clamp(40px,12vw,72px)}.screen{padding:5vw}.timer{font-size:20px}.top{padding-right:8px}.toast{font-size:clamp(22px,7vw,44px)}.hud{padding:14px}.panel{padding:22px}.stats{font-size:12px;gap:8px}}
-@media (max-height:460px){h1{font-size:clamp(28px,9vh,52px);margin:10px 0}.copy,.sub{display:none}.screen{align-items:flex-start;padding-top:4vh}.tnote{display:none}}
+@media (max-height:460px){h1{font-size:clamp(28px,9vh,52px);margin:10px 0}.copy,.sub{display:none}.screen{align-items:flex-start;padding-top:4vh}}
 
 /* The briefing: one card over a live shot of whoever it is about. */
 .dvx{height:9px;vertical-align:-.5px;margin-right:5px}
