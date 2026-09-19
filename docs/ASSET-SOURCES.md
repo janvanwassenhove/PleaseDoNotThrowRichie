@@ -45,4 +45,4 @@ The gadgets on the booths (a toaster with legs and antennae, a rubber duck with 
 
 Asset: conference-goers walking the exhibition hall, foyer and corridor, seated in auditorium 8 and standing in its front rows. Source: original procedural figures (`src/people.ts`), seeded for variety — skin and hair, hoodies and T-shirts, jeans, glasses, beards, caps, backpacks, lanyards with badges, coffee cups, laptops, and shirt slogans (JAVA, DEVOXX, `git blame`, …) drawn to canvas textures at runtime. Security guards reuse the same figures with a black uniform, cap, radio, earpiece and a SECURITY shirt. No photographs or third-party models.
 
-No third-party audio, photographs or generated meshes are included. Beyond the Reachy Mini geometry and the generated textures above, materials, signs and venue geometry are made at runtime.
+No third-party audio, photographs or generated meshes are included. Beyond the Reachy Mini geometry and the generated textures above, materials, signs and venue geometry are made at runtime. Menu, tutorial and gameplay music are original procedural Web Audio compositions generated from oscillators; no samples or external music files are used.

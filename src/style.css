@@ -33,7 +33,7 @@ body.touch .controls{display:none}body.touch .charge{bottom:150px;right:20px;wid
 @media (max-height:560px){.tart img{height:38px}.tart img.cut{height:52px}}@media (max-height:460px){.tart{display:none}}
 /* The way out of a run. The HUD ignores the pointer, so this one button takes it back. */
 .menubtn{pointer-events:auto;align-self:flex-start;background:#10232bd9;color:#f6f0e1;border:1px solid #58727a;border-radius:5px;padding:9px 13px;font:800 11px Arial,sans-serif;letter-spacing:.12em;cursor:pointer}
-.menubtn:hover,.menubtn:active{background:#ffbd5c;color:#122530;border-color:#ffbd5c}
+.hudbuttons{display:flex;gap:8px;align-items:flex-start}.musicbtn{pointer-events:auto;background:#10232bd9;color:#ffd089;border:1px solid #58727a;border-radius:5px;padding:9px 13px;font:800 11px Arial,sans-serif;letter-spacing:.08em;cursor:pointer}.menubtn:hover,.menubtn:active,.musicbtn:hover,.musicbtn:active{background:#ffbd5c;color:#122530;border-color:#ffbd5c}
 #pause .panel h2{margin:14px 0 10px}
 @media (max-width:760px){.menubtn{padding:7px 10px;font-size:10px;letter-spacing:.08em}}
 /* Portrait on a phone: the hint sits above the charge bar rather than across it. */
@@ -41,4 +41,3 @@ body.touch .controls{display:none}body.touch .charge{bottom:150px;right:20px;wid
 /* A phone in landscape has no room bottom-right: the charge meter moves up under the MENU
    button rather than sitting across the action buttons. */
 @media (max-height:520px){body.touch .charge{top:74px;bottom:auto;left:50%;right:auto;width:min(46vw,220px);transform:translateX(-50%);text-align:center;font-size:11px}}
-
