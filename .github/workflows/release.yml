@@ -131,7 +131,9 @@ jobs:
 
       # Everything that could fail has succeeded: now the version bump is for real.
       # The push is a fast-forward of main from the pushed commit; if main moved in the
-      # meantime it is refused and the release simply has to run again.
+      # meantime it is refused and the release simply has to run again. --atomic makes
+      # the tag share the branch's fate: without it a refused branch still left the tag
+      # behind, and every later run died on "tag already exists" (v1.0.14, 2026-09-19).
       - name: Bump, commit and tag
         run: |
           set -euo pipefail
@@ -139,7 +141,7 @@ jobs:
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           TAG="$(npm version '${{ needs.prepare.outputs.level }}' -m 'chore(release): %s [skip ci]' | tail -n1)"
           [ "$TAG" = '${{ needs.prepare.outputs.tag }}' ] || { echo "version drifted: $TAG vs ${{ needs.prepare.outputs.tag }}"; exit 1; }
-          git push --follow-tags origin HEAD:main
+          git push --atomic --follow-tags origin HEAD:main
 
       # Pull every artifact (screenshots + the zipped site) into ./artifacts/*.
       - uses: actions/download-artifact@v4
