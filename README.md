@@ -7,14 +7,15 @@
 **Richie has a keynote. Richie has no legs.**
 *Gravity is about to become a team sport.*
 
-[**▶ PLAY IT IN YOUR BROWSER**](https://janvanwassenhove.github.io/PleaseDoNotThrowRichie/)
+[**▶ PLAY IT IN YOUR BROWSER**](https://janvanwassenhove.github.io/PleaseDoNotThrowRichie/) · or *Add to Home Screen* and **▶ PLAY IT AS AN APP**
 
 [![Play](https://img.shields.io/badge/play-now-ffbd5c?style=for-the-badge)](https://janvanwassenhove.github.io/PleaseDoNotThrowRichie/)
 [![Release](https://img.shields.io/github/v/release/janvanwassenhove/PleaseDoNotThrowRichie?style=for-the-badge&color=f0640f)](https://github.com/janvanwassenhove/PleaseDoNotThrowRichie/releases)
 [![Build](https://img.shields.io/github/actions/workflow/status/janvanwassenhove/PleaseDoNotThrowRichie/ci.yml?branch=main&style=for-the-badge)](https://github.com/janvanwassenhove/PleaseDoNotThrowRichie/actions)
 [![Licence](https://img.shields.io/badge/licence-MIT-2f6b4f?style=for-the-badge)](LICENSE)
+[![PWA](https://img.shields.io/badge/PWA-installs%20%C2%B7%20plays%20offline-2a6a8a?style=for-the-badge)](https://janvanwassenhove.github.io/PleaseDoNotThrowRichie/)
 
-No install. No account. No backend. One tab, ten minutes.
+No account. No backend. No app store. One tab, ten minutes — or install it from that tab and it lives on your phone, and plays with no signal at all.
 
 ![The exhibition floor at Devoxx Belgium](docs/screenshots/hero.jpg)
 
