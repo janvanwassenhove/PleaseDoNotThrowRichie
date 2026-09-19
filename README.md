@@ -158,7 +158,7 @@ pip download reachy-mini --no-deps -d /tmp/rm && (cd /tmp/rm && unzip -q *.whl)
 python3 scripts/build-richie.py /tmp/rm/reachy_mini/descriptions/reachy_mini/mjcf src/assets/richie.glb
 ```
 
-The wheel, not the git checkout: the repository keeps its STLs in Git LFS. Voxxy, Droid and Biggy (`src/robots.ts`) are procedural models of the [Robot Games model sheets](https://game.devoxx.be/references.html); the conference crowd (`src/people.ts`) and the venue (`src/venue.ts`) are procedural too. The venue's textures live in `src/assets/textures/`; `python scripts/import-texture.py <name> [--tile] [--alpha] [--crop 3x2]` brings a new generated image in. See [asset sources](docs/ASSET-SOURCES.md). `npm run icons` re-renders the PWA icons from `public/favicon.svg`.
+The wheel, not the git checkout: the repository keeps its STLs in Git LFS. Voxxy, Droid and Biggy (`src/robots.ts`) are procedural models of the [Robot Games model sheets](https://game.devoxx.be/references.html); the conference crowd (`src/people.ts`) and the venue (`src/venue.ts`) are procedural too — the crowd is one material whose map is an atlas of generated skin, cloth, hair and leather (`prompts/003-people.md`). Textures live in `src/assets/textures/`; `python scripts/import-texture.py <name> [--tile] [--alpha] [--crop 3x2]` brings a new generated image in. See [asset sources](docs/ASSET-SOURCES.md). `npm run icons` re-renders the PWA icons from `public/favicon.svg`.
 
 </details>
 

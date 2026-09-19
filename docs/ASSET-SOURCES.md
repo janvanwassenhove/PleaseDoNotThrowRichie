@@ -36,6 +36,7 @@ Asset: the image textures under `src/assets/textures/`. Source: generated for th
 | `booth-1.jpg` … `booth-6.jpg` | booth backdrops for six absurd exhibitors: ROBO-BARISTA 9000, DUKE'S GADGET LAB, RUBBER DUCK AI, TOAST-AS-A-SERVICE, SELF-DRIVING OFFICE CHAIR, NULLPOINTER DETECTOR | the six exhibition booths; four reappear as sponsor lightboxes in the foyer |
 | `duke.png` | Duke as a cardboard standee with a lanyard and springy antennas | one by every booth |
 | `keynote-bg.jpg` | a text-free keynote backdrop: three robot silhouettes under an orange-to-magenta sky | the screen in auditorium 8, with the Devoxx logo and KEYNOTE set over it at runtime |
+| `people-skin.jpg`, `people-cotton.jpg`, `people-denim.jpg`, `people-fleece.jpg`, `people-wool.jpg`, `people-hair.jpg`, `people-leather.jpg` | close-ups of skin, t-shirt jersey, denim twill, hoodie fleece, suit wool, hair and shoe leather (prompts/003-people.md), optional and independent of each other | the crowd's one material: an atlas of these, converted to grey relief at load so the vertex colour keeps the tone, doubling as bump map |
 
 Duke is the Java mascot, which Oracle released under the BSD licence (https://openjdk.org/projects/duke/). The generated standee came with a coffee-cup logo on its badge; that logo is a trademark, so the import step paints the badge over as a plain conference badge. Every texture is optional at runtime: a material whose image is missing falls back to a flat colour, and a booth without a poster sets its own name in type.
 
