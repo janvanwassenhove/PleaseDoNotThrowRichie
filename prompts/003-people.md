@@ -1,6 +1,6 @@
 # 003 — Skin and cloth for the crowd
 
-Tool: ChatGPT image generation. Each prompt produces one image, which `scripts/import-texture.py`
+Tool: ChatGPT image generation, one conversation, 2026-09-19, driven by Claude Code in the user's Chrome. Each prompt produced one image, which `scripts/import-texture.py`
 brings into `src/assets/textures/` under the name given. The human instruction behind it:
 
 > make the humans all hyperrealistic
