@@ -181,18 +181,39 @@ function toasterBot(k: Kit, p: T.Object3D) {
   for (const x of [-.13, .13]) { k.rod(G.black, p, [x, .32, -.06], [x * 1.5, .5, -.08], .006); k.ball(G.red, p, [x * 1.5, .5, -.08], .022); }
   for (const x of [-.13, .13]) for (const z of [-.07, .07]) { k.rod(G.black, p, [x, .09, z], [x * 1.15, .02, z * 1.2], .012); k.ball(G.rubber, p, [x * 1.15, .02, z * 1.2], .022); }
 }
+/** The rubber duck itself, one red robot eye and all, sitting .11 above its origin; `o` and `s` move and scale it. */
+function duck(k: Kit, p: T.Object3D, o: V3 = [0, 0, 0], s = 1) {
+  const P = (x: number, y: number, z: number): V3 => [o[0] + x * s, o[1] + y * s, o[2] + z * s];
+  k.ball(G.yellow, p, P(0, .24, 0), .16 * s, [1.05, .82, 1.3]);
+  k.ball(G.yellow, p, P(0, .25, -.2), .06 * s, [.8, .6, 1.2]);
+  k.ball(G.yellow, p, P(0, .43, .1), .11 * s);
+  k.ball(G.orange, p, P(0, .41, .215), .05 * s, [1.3, .45, 1]);
+  k.ball(G.black, p, P(-.05, .46, .19), .018 * s);
+  k.add(new T.CylinderGeometry(.03, .034, .03, 16), G.black, p, {p: P(.05, .46, .185), r: [Math.PI / 2 - .2, 0, -.3], s});
+  k.ball(G.eye, p, P(.053, .462, .2), .017 * s);
+}
 function duckDrone(k: Kit, p: T.Object3D) {
   k.add(new T.CylinderGeometry(.13, .15, .04, 24), G.black, p, {p: [0, .02, 0]});
   k.rod(G.chrome, p, [0, .04, 0], [0, .12, 0], .012);
-  k.ball(G.yellow, p, [0, .24, 0], .16, [1.05, .82, 1.3]);
-  k.ball(G.yellow, p, [0, .25, -.2], .06, [.8, .6, 1.2]);
-  k.ball(G.yellow, p, [0, .43, .1], .11);
-  k.ball(G.orange, p, [0, .41, .215], .05, [1.3, .45, 1]);
-  k.ball(G.black, p, [-.05, .46, .19], .018);
-  k.add(new T.CylinderGeometry(.03, .034, .03, 16), G.black, p, {p: [.05, .46, .185], r: [Math.PI / 2 - .2, 0, -.3]});
-  k.ball(G.eye, p, [.053, .462, .2], .017);
+  duck(k, p);
   k.rod(G.black, p, [0, .53, .08], [0, .64, .08], .008);
   for (const a of [0, Math.PI / 2]) k.add(new T.BoxGeometry(.34, .006, .035), G.black, p, {p: [0, .64, .08], r: [0, a + .4, .06]});
+}
+/** Rubber Duck AI's poster: the duck, with a headset and an antenna, on top of a humming server rack. */
+function duckServer(k: Kit, p: T.Object3D) {
+  k.add(new T.BoxGeometry(.7, 1.5, .8), G.black, p, {p: [0, .75, 0]});
+  for (const [x, z] of [[-.3, -.35], [.3, -.35], [-.3, .35], [.3, .35]]) k.add(new T.CylinderGeometry(.03, .03, .03, 10), G.rubber, p, {p: [x, .015, z]});
+  for (let j = 0; j < 8; j++) {                                  // blades, each with its own row of lights
+    const y = .14 + j * .17;
+    k.add(new T.BoxGeometry(.6, .13, .02), G.fabric, p, {p: [0, y, .405]});
+    k.ball(G.lidar, p, [-.24, y, .42], .012); k.ball(j % 3 ? G.lidar : G.eye, p, [-.2, y, .42], .012);
+    for (let n = 0; n < 6; n++) k.add(new T.BoxGeometry(.03, .09, .006), G.chrome, p, {p: [-.1 + n * .06, y, .417]});
+  }
+  const s = 1.8, o: V3 = [0, 1.5 - .11 * s, 0];
+  duck(k, p, o, s);
+  k.add(new T.TorusGeometry(.12 * s, .012 * s, 6, 18, Math.PI), G.black, p, {p: [o[0], o[1] + .43 * s, o[2] + .1 * s]});   // headset
+  k.rod(G.black, p, [o[0] - .12 * s, o[1] + .43 * s, o[2] + .1 * s], [o[0] - .07 * s, o[1] + .38 * s, o[2] + .24 * s], .006 * s); k.ball(G.black, p, [o[0] - .07 * s, o[1] + .38 * s, o[2] + .24 * s], .014 * s);
+  k.rod(G.chrome, p, [o[0], o[1] + .53 * s, o[2] + .08 * s], [o[0], o[1] + .68 * s, o[2] + .08 * s], .006 * s); k.ball(G.red, p, [o[0], o[1] + .68 * s, o[2] + .08 * s], .02 * s);
 }
 function coffeeBot(k: Kit, p: T.Object3D) {
   for (const x of [-.1, .1]) k.add(new RoundedBoxGeometry(.07, .08, .3, 2, .03), G.rubber, p, {p: [x, .04, 0]});
@@ -229,6 +250,54 @@ function robotArm(k: Kit, p: T.Object3D) {
   for (const s of [-1, 1]) k.rod(G.chrome, p, [d[0] + s * .04, d[1], d[2]], [d[0] + s * .03, d[1] - .13, d[2]], .012, .007);
   k.add(new T.TorusGeometry(.045, .02, 8, 14, Math.PI), G.toast, p, {p: [d[0], d[1] - .15, d[2]], r: [0, .6, Math.PI]});
 }
+/** Robo-Barista's poster: a chrome espresso machine with six tiny arms, googly eyes and a steam-whistle hat. */
+function espressoBot(k: Kit, p: T.Object3D) {
+  k.add(new T.BoxGeometry(.44, .06, .32), G.black, p, {p: [0, .03, 0]});                 // drip tray
+  k.add(new RoundedBoxGeometry(.42, .44, .3, 3, .04), G.chrome, p, {p: [0, .3, 0]});
+  k.add(new T.BoxGeometry(.4, .04, .16), G.black, p, {p: [0, .08, .1]});
+  k.add(new T.CylinderGeometry(.045, .045, .08, 16), G.chrome, p, {p: [0, .19, .13]});    // group head, portafilter handle
+  k.rod(G.black, p, [0, .17, .13], [0, .17, .32], .012);
+  k.add(new T.CylinderGeometry(.04, .03, .09, 14), G.white, p, {p: [0, .125, .13]});     // the cup under it
+  for (const x of [-.09, .09]) { k.ball(G.white, p, [x, .42, .15], .05); k.ball(G.black, p, [x + .01, .41, .195], .02); }
+  k.add(new T.CylinderGeometry(.14, .11, .04, 20), G.chrome, p, {p: [0, .54, 0]});        // hat, whistle and steam
+  k.add(new T.CylinderGeometry(.03, .04, .12, 12), mats.brass, p, {p: [0, .62, 0]});
+  k.add(new T.CylinderGeometry(.045, .035, .04, 12), mats.brass, p, {p: [0, .69, 0]});
+  for (const [x, y, r] of [[.03, .76, .03], [.06, .82, .04], [.1, .89, .05]]) k.ball(G.white, p, [x, y, 0], r);
+  for (let i = 0; i < 3; i++) for (const s of [-1, 1]) {                                  // six arms, one with a fresh cup
+    const a: V3 = [s * .21, .2 + i * .1, -.08 + i * .08], b: V3 = [s * .33, .12 + i * .14, .02 + i * .06];
+    k.rod(G.black, p, a, b, .012, .009); k.ball(G.rubber, p, b, .02);
+    if (i === 2 && s > 0) k.add(new T.CylinderGeometry(.04, .03, .09, 14), G.white, p, {p: [b[0] + .02, b[1] + .06, b[2]]});
+  }
+}
+/** A stack of paper cups, for the bar. */
+function cupStack(k: Kit, p: T.Object3D) {
+  for (const [x, z, n] of [[0, 0, 5], [-.1, .02, 3]]) for (let i = 0; i < n; i++) k.add(new T.CylinderGeometry(.04, .03, .09, 14), G.white, p, {p: [x, .045 + i * .025, z]});
+}
+/** Toast, fresh from the vitrine. */
+function toastSlices(k: Kit, p: T.Object3D) {
+  for (const [x, z, a] of [[0, 0, .3], [.06, .1, -.5], [-.05, -.08, 1.1]]) k.add(new RoundedBoxGeometry(.15, .02, .14, 2, .008), G.toast, p, {p: [x, .01, z], r: [0, a, 0]});
+}
+/** A laptop, open, screen lit. */
+function laptop(k: Kit, p: T.Object3D) {
+  k.add(new T.BoxGeometry(.32, .015, .22), G.chrome, p, {p: [0, .008, 0]});
+  k.add(new T.BoxGeometry(.32, .21, .012), G.chrome, p, {p: [0, .105, -.11], r: [-.2, 0, 0]});
+  k.add(new T.PlaneGeometry(.29, .18), mats.blue, p, {p: [0, .108, -.1], r: [-.2, 0, 0]});
+}
+/** NullPointer Detector's poster: a chunky hazard-striped handheld with a dish, a gauge in the red and a claw. */
+function nullDetector(k: Kit, p: T.Object3D) {
+  k.add(new RoundedBoxGeometry(.34, .14, .2, 3, .03), G.yellow, p, {p: [0, .1, 0]});
+  for (const x of [-.11, 0, .11]) k.add(new T.BoxGeometry(.03, .142, .202), G.black, p, {p: [x, .1, 0]});
+  k.add(new RoundedBoxGeometry(.12, .08, .26, 2, .03), G.rubber, p, {p: [0, .08, -.2]});   // grip
+  k.add(new T.CylinderGeometry(.06, .06, .02, 20), G.white, p, {p: [.08, .175, 0]});      // the gauge, needle in the red
+  k.add(new T.CylinderGeometry(.064, .064, .012, 20, 1, true), G.black, p, {p: [.08, .18, 0]});
+  k.add(new T.BoxGeometry(.008, .008, .05), G.red, p, {p: [.09, .19, -.01], r: [0, -.9, 0]});
+  for (const [x, m] of [[-.06, G.eye], [-.09, G.flame], [-.12, G.lidar]] as const) k.ball(m, p, [x, .18, .05], .014);
+  k.rod(G.chrome, p, [-.08, .17, -.05], [-.08, .3, -.09], .008);                          // dish on a stalk
+  k.add(new T.SphereGeometry(.09, 16, 8, 0, Math.PI * 2, 0, Math.PI / 2), G.white, p, {p: [-.08, .3, -.09], r: [Math.PI - .7, 0, 0]});
+  k.rod(G.black, p, [-.08, .3, -.09], [-.08, .37, -.03], .004); k.ball(G.eye, p, [-.08, .37, -.03], .012);
+  k.rod(G.chrome, p, [0, .1, .1], [0, .1, .2], .012);                                    // claw
+  for (const s of [-1, 1]) k.rod(G.black, p, [s * .02, .1, .2], [s * .05, .1, .28], .008, .005);
+}
 
 // ------------------------------------------------------------------ exhibition booths
 const BRANDS = [
@@ -238,6 +307,94 @@ const BRANDS = [
   {name: 'TOAST-AS-A-SERVICE', sub: '99.9% UPTIME. 100% CRUMBS.', bg: '#2f7d4f', fg: '#fdf3d8', pad: 0x1f4f33},
   {name: 'SELF-DRIVING OFFICE CHAIR', sub: 'STAND-UPS WILL NEVER BE THE SAME', bg: '#5b2a8c', fg: '#ffd9a8', pad: 0x2e1547},
   {name: 'NULLPOINTER DETECTOR', sub: 'BEEPS BEFORE PRODUCTION DOES', bg: '#111111', fg: '#f6c21c', pad: 0x3a3206},
+];
+type Put = (geo: T.BufferGeometry, m: T.Material, x: number, y: number, zz: number, shadow?: boolean) => T.Mesh;
+type Brand = typeof BRANDS[number];
+// Every stand hires its own furniture. Whatever the style, the counter keeps to the same
+// footprint (0.8 to 1.6 m out from the back wall, 2 m along the aisle) and its top stays at
+// about 1.05 m, so the colliders, the guards' sightlines and the merchandise spots don't change.
+function counter(c: Ctx, k: Kit, put: Put, X: (l: number) => number, z: number, yaw: number, i: number, b: Brand, brand: T.Material) {
+  const {scene} = c, zc = z - .2;
+  const front = (w: number, h: number, l: number, y: number, dz = 0) => lightbox(scene, textTex(b.name, {bg: b.bg, fg: b.fg, h: 256, font: 84}), w, h, X(l), y, zc + dz, yaw, false);
+  /** A half-round shell bulging towards the aisle: `rx` along the aisle, `rz` out of the booth. */
+  const arc = (m: T.Material, rx: number, rz: number, h: number, l: number, y: number, dz = 0, open = false) => {
+    const q = put(new T.CylinderGeometry(1, 1, h, 40, 1, open, -Math.PI / 2, Math.PI), m, X(l), y, zc + dz);
+    q.scale.set(rx, 1, rz); q.rotation.y = yaw; return q;
+  };
+  switch (i % 6) {
+    case 0: {  // A coffee bar: an L of counter in walnut and brand, with a foot rail along the front.
+      put(new T.BoxGeometry(.8, 1.0, 2), brand, X(1.2), .5, zc); c.collide(X(1.2), .525, zc, .4, .525, 1);
+      put(new T.BoxGeometry(.7, 1.0, .45), brand, X(.45), .5, zc - .78); c.collide(X(.45), .525, zc - .78, .35, .525, .225);
+      put(new T.BoxGeometry(1.0, .06, 2.14), mats.wood, X(1.17), 1.03, zc);
+      put(new T.BoxGeometry(.75, .06, .5), mats.wood, X(.42), 1.03, zc - .78);
+      put(new T.BoxGeometry(.06, .1, 2), mats.black, X(1.6), .05, zc, false);
+      k.rod(mats.brass, scene, [X(1.68), .22, zc - .95], [X(1.68), .22, zc + .95], .022);
+      for (const dz of [-.9, 0, .9]) k.rod(mats.brass, scene, [X(1.6), .22, zc + dz], [X(1.68), .22, zc + dz], .014);
+      front(1.8, .4, 1.605, .68);
+      break;
+    }
+    case 1: {  // A rounded reception pod, lit all the way round.
+      arc(brand, 1.0, .8, 1.0, .8, .5);
+      arc(new T.MeshBasicMaterial({map: textTex(b.name, {bg: b.bg, fg: b.fg, w: 1536, h: 256, font: 84})}), 1.01, .81, .4, .8, .6, 0, true);
+      arc(mats.laminate, 1.06, .86, .05, .8, 1.025);
+      put(new T.BoxGeometry(.04, 1.0, 2), brand, X(.8), .5, zc);
+      c.collide(X(1.2), .525, zc, .4, .525, 1);
+      break;
+    }
+    case 2: {  // Two plinths, one gadget each, with a glowing collar in the brand colour.
+      const collar = glow(new T.Color(b.bg).getHex(), 2.2);
+      for (const [l, dz] of [[1.2, -.65], [1.15, .55]]) {
+        put(new T.CylinderGeometry(.36, .36, 1.0, 32), brand, X(l), .5, zc + dz);
+        put(new T.CylinderGeometry(.42, .42, .05, 32), mats.laminate, X(l), 1.025, zc + dz);
+        put(new T.CylinderGeometry(.4, .4, .06, 32), mats.black, X(l), .03, zc + dz);
+        put(new T.CylinderGeometry(.365, .365, .06, 32, 1, true), collar, X(l), .9, zc + dz, false);
+        c.collide(X(l), .525, zc + dz, .42, .525, .42);
+      }
+      break;
+    }
+    case 3: {  // A glass vitrine with a scale model of the product inside.
+      put(new T.BoxGeometry(.8, .5, 2), mats.black, X(1.2), .25, zc);
+      front(1.8, .3, 1.605, .25);
+      for (const l of [.82, 1.58]) for (const dz of [-.98, .98]) k.rod(mats.chrome, scene, [X(l), .5, zc + dz], [X(l), 1.0, zc + dz], .015);
+      put(new T.BoxGeometry(.78, .5, 1.98), mats.glass, X(1.2), .75, zc, false);
+      put(new T.BoxGeometry(.86, .03, 2.06), mats.glass, X(1.2), 1.035, zc, false);
+      put(new T.BoxGeometry(.3, .08, .3), brand, X(1.2), .54, zc);
+      k.at(X(1.2), .58, zc, yaw + .5, .55); toasterBot(k, scene); k.at();
+      c.collide(X(1.2), .525, zc, .4, .525, 1);
+      break;
+    }
+    case 4: {  // A high table on chrome legs, a modesty panel, and a laptop running the demo.
+      put(new T.BoxGeometry(.9, .05, 2.1), mats.laminate, X(1.2), 1.025, zc);
+      for (const l of [.85, 1.55]) for (const dz of [-.95, .95]) k.rod(mats.chrome, scene, [X(l), 0, zc + dz], [X(l), 1.0, zc + dz], .025);
+      put(new T.BoxGeometry(.04, .62, 1.9), brand, X(1.58), .66, zc);
+      front(1.8, .4, 1.605, .66);
+      k.at(X(1.25), 1.05, zc - .45, yaw); laptop(k, scene); k.at();
+      c.collide(X(1.2), .525, zc, .4, .525, 1);
+      break;
+    }
+    default:   // The trade-show classic: a laminate box in the brand colour.
+      put(new T.BoxGeometry(.8, 1.0, 2), brand, X(1.2), .5, zc); c.collide(X(1.2), .525, zc, .4, .525, 1);
+      put(new T.BoxGeometry(.9, .05, 2.1), mats.laminate, X(1.2), 1.025, zc);
+      front(1.8, .45, 1.605, .58);
+  }
+}
+// What each exhibitor shows, matching the poster behind it: gadget, distance out from the back
+// wall, height, offset along the aisle, yaw off the booth's facing, and scale. Counter tops
+// are at 1.05 m (the bar's walnut at 1.06); the floor is at .04 on the pad.
+type Prop = [(k: Kit, p: T.Object3D) => void, number, number, number, number, number];
+const DRESSING: Prop[][] = [
+  // Robo-Barista: the espresso robot and its cup-on-tracks on the bar, cups on the short end, the arm serving croissants.
+  [[espressoBot, 1.15, 1.06, -.55, .35, 1.2], [coffeeBot, 1.15, 1.06, .5, -.5, 1.2], [cupStack, .42, 1.06, -.78, 0, 1], [robotArm, -.5, .04, -.3, .5, 1.15]],
+  // Duke's Gadget Lab: the workbench crowded with everything on the poster, and the lab arm.
+  [[toasterBot, 1.05, 1.05, -.6, .5, .95], [duckDrone, 1.38, 1.05, .05, -.2, .9], [coffeeBot, 1.0, 1.05, .6, -.7, .95], [robotArm, -.5, .04, -.3, .5, 1.15]],
+  // Rubber Duck AI: a duck drone on each plinth, the big duck on its server rack.
+  [[duckDrone, 1.2, 1.05, -.65, .4, 1.2], [duckDrone, 1.15, 1.05, .55, -.5, 1.2], [duckServer, -.5, .04, -.3, -.4, 1]],
+  // Toast-as-a-Service: the small one is in the vitrine; toast on the glass, and the full-size toaster robot beside it.
+  [[toastSlices, 1.2, 1.05, .4, .3, 1], [toasterBot, -.45, .04, -.3, -.4, 2.4]],
+  // Self-Driving Office Chair: the laptop is on the table; a desk model next to it, the real thing on the floor.
+  [[selfDrivingChair, 1.2, 1.05, .5, -.6, .4], [selfDrivingChair, -.5, .04, -.3, -.4, 1.15]],
+  // NullPointer Detector: the detector scanning a laptop on the counter, and a giant demo unit on the floor.
+  [[nullDetector, 1.2, 1.05, -.55, .5, 1.3], [laptop, 1.2, 1.05, .4, .3, 1], [nullDetector, -.5, .04, -.3, -.4, 2.6]],
 ];
 function booth(c: Ctx, k: Kit, s: number, z: number, i: number) {
   const {scene} = c, b = BRANDS[i % BRANDS.length], ax = -s, X = (l: number) => s * 8 + ax * l, yaw = ax * Math.PI / 2;
@@ -251,14 +408,9 @@ function booth(c: Ctx, k: Kit, s: number, z: number, i: number) {
   if (art) { art.wrapS = art.wrapT = T.ClampToEdgeWrapping; art.repeat.set(1, 1); }
   lightbox(scene, art ?? textTex(b.name, {bg: b.bg, fg: b.fg, sub: b.sub, w: 1024, h: 683, font: 96}), 2.9, 1.93, X(-1.81), 1.75, z, yaw, false);
   lightbox(scene, textTex(b.name, {bg: b.bg, fg: b.fg, h: 200, font: 92}), 3, .58, X(-1.78), 3.6, z, yaw);
-  // Counter, with the brand on its front and the merchandise on top.
-  put(new T.BoxGeometry(.8, 1.0, 2), brand, X(1.2), .5, z - .2); c.collide(X(1.2), .525, z - .2, .4, .525, 1);
-  put(new T.BoxGeometry(.9, .05, 2.1), mats.laminate, X(1.2), 1.025, z - .2);
-  lightbox(scene, textTex(b.name, {bg: b.bg, fg: b.fg, h: 256, font: 84}), 1.8, .45, X(1.605), .58, z - .2, yaw, false);
-  const toys = [coffeeBot, toasterBot, duckDrone, toasterBot, coffeeBot, duckDrone];
-  k.at(X(1.2), 1.05, z - .85, yaw + .4, 1.25); toys[i % 6](k, scene);
-  k.at(X(1.15), 1.05, z + .35, yaw - .5, 1.25); toys[(i + 2) % 6](k, scene);
-  k.at(X(-.5), .04, z - .3, yaw + (i % 2 ? .5 : -.4), 1.15); (i % 2 ? robotArm : selfDrivingChair)(k, scene);
+  // Counter, with the brand on its front, then the merchandise: on the counter and on the floor.
+  counter(c, k, put, X, z, yaw, i, b, brand);
+  for (const [fn, l, y, dz, dy, s] of DRESSING[i % 6]) { k.at(X(l), y, z + dz, yaw + dy, s); fn(k, scene); }
   // Track spots along the top of the back wall.
   for (const dz of [-1, 0, 1]) { k.at(X(-1.7), 3.28, z + dz, yaw); k.add(new T.CylinderGeometry(.05, .07, .16, 12), mats.black, scene, {p: [0, 0, .08], r: [.9, 0, 0]}); k.add(new T.CircleGeometry(.05, 12), mats.warm, scene, {p: [0, -.052, .145], r: [Math.PI / 2 + .9, 0, 0]}); }
   k.at();

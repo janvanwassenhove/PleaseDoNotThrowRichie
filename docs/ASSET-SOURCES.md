@@ -39,7 +39,7 @@ Asset: the image textures under `src/assets/textures/`. Source: generated for th
 
 Duke is the Java mascot, which Oracle released under the BSD licence (https://openjdk.org/projects/duke/). The generated standee came with a coffee-cup logo on its badge; that logo is a trademark, so the import step paints the badge over as a plain conference badge. Every texture is optional at runtime: a material whose image is missing falls back to a flat colour, and a booth without a poster sets its own name in type.
 
-The gadgets on the booths (a toaster with legs and antennae, a rubber duck with a propeller and one red eye, a paper cup on tank tracks holding a croissant aloft, an office chair with a lidar and boosters, an industrial arm offering a croissant), the popcorn machine, the light fittings, the truss and the seats are original procedural geometry (`src/venue.ts`).
+The gadgets on the booths (a toaster with legs and antennae, a rubber duck with a propeller and one red eye, the same duck with a headset on a server rack, a paper cup on tank tracks holding a croissant aloft, a six-armed espresso machine in a steam-whistle hat, an office chair with a lidar and boosters, an industrial arm offering a croissant, a hazard-striped null-pointer detector with a satellite dish), the popcorn machine, the light fittings, the truss and the seats are original procedural geometry (`src/venue.ts`).
 
 ## The crowd
 
