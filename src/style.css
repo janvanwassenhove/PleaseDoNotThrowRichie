@@ -2,6 +2,13 @@
 
 #boot{position:fixed;inset:0;z-index:20;display:grid;place-items:center;background:#0d1c27;padding:8vw;text-align:center}#boot b{display:block;font-size:13px;letter-spacing:.1em}#boot span{display:block;margin-top:14px;color:#aec0c5;line-height:1.6;max-width:520px}#boot code{display:block;margin-top:14px;font:11px monospace;color:#7f949b}#boot .btn{display:inline-block;margin-top:18px;text-decoration:none}#boot.failed b{color:#ffbd5c}
 .version{position:fixed;right:18px;bottom:14px;z-index:6;font-size:10px;letter-spacing:.14em;color:#64808b}
+/* The sister game's poster, bottom right of the title screen, above the version badge. */
+.ad{position:absolute;right:max(18px,env(safe-area-inset-right));bottom:max(38px,calc(env(safe-area-inset-bottom) + 34px));display:block;padding:12px 16px;border:1px solid #6b5330;border-radius:5px;background:#1a1410e6;color:#f6f0e1;text-decoration:none;line-height:1.3;backdrop-filter:blur(3px);transition:border-color .15s,transform .15s}
+.ad:hover{border-color:#ffbd5c;transform:translateY(-2px)}
+.ad small{display:block;font-size:9px;letter-spacing:.18em;color:#ff7a3d}
+.ad b{display:block;font-size:22px;font-weight:900;letter-spacing:-.03em;margin:4px 0 2px}.ad b em{font-style:normal;color:#ffbd5c}
+.ad span{display:block;font-size:11px;color:#c1ced0}.ad span i{font-style:normal;font-weight:800;color:#ffbd5c;margin-left:6px}
+@media (max-width:760px),(max-height:460px){.ad{padding:8px 12px}.ad small,.ad span{display:none}.ad b{font-size:14px;margin:0}.ad b::after{content:' ↗';color:#ffbd5c}}
 .tnote{margin-top:18px;border:1px solid #6b5330;background:#2a2114;color:#ffd79a;padding:10px 14px;border-radius:5px;font-size:12px;line-height:1.5}
 
 /* Touch controls: a stick to aim with on the left, the three actions on the right. Shown
