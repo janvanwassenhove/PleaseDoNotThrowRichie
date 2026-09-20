@@ -194,6 +194,7 @@ function fmt(s:number){return Math.floor(Math.max(0,s)/60).toString().padStart(2
  results(){showResults()},
  finale(){play();crowd=3;cp=7;player.setTranslation({x:0,y:8.2,z:255},true);player.setLinvel({x:0,y:0,z:0},true)},
  get crowd(){return {ex:+crowdEx.toFixed(2),clusters:crowdM.group.children.map(m=>m.visible?1:0)}},
+ get walkers(){return walkers.map(w=>[+w.group.position.x.toFixed(1),+w.group.position.y.toFixed(1),+w.group.position.z.toFixed(1),+w.yaw.toFixed(2),w.onPhone?1:0])},
  get guards(){return guards.map(g=>[g.state,+g.group.position.x.toFixed(1),+g.group.position.z.toFixed(1)])},
  alarm(){play();cp=1;reset();guards[1].place(0,0,37,Math.PI)},
  robotView(i=0,d=4,h=1.4,side=.5){const rb=robots[i],y=rb.group.rotation.y,q=rb.position;freeLook={pos:new T.Vector3(q.x+Math.sin(y+side)*d,q.y+h+.6,q.z+Math.cos(y+side)*d),at:new T.Vector3(q.x,q.y+h,q.z)}},

@@ -207,11 +207,21 @@ function forearmGeo(s: Spec, side: number) {
   const fore = s.longSleeve ? s.top : s.skin, foreSlot: Slot = s.longSleeve ? cloth : 'skin';
   const f: T.BufferGeometry[] = [part(at(taper(.054, .044, .27), 0, -.135, 0), fore, foreSlot)];
   if (s.longSleeve) f.push(part(at(ball(.045, 10), 0, -.27, 0), s.skin, 'skin'));                                // wrist showing
+  // The hand: a palm, four fingers curled under it, the thumb lying along its edge. Nothing
+  // sticks up on its own: a lone thumb beside a thin black stick read as a raised finger.
+  const phone = !!s.phone && side < 0 && !s.laptop, grip = phone ? .045 : .02;
   f.push(part(at(ball(.05, 12), 0, -.32, .01, 0, 0, 0, .78, 1.15, .42), s.skin, 'skin'));                         // palm
-  f.push(part(at(capsule(.014, .04), side * .04, -.3, .03, 0, 0, side * .6), s.skin, 'skin'));                   // thumb
+  for (let i = 0; i < 4; i++) f.push(part(at(capsule(.011, .03), (i - 1.5) * .019, -.36, grip + .005, -1.3 - (phone ? .3 : .6)), s.skin, 'skin')); // fingers, curled
+  f.push(part(at(capsule(.012, .035), side * .035, -.31, grip + (phone ? .04 : .015), -.4, 0, side * (phone ? .15 : .4)), s.skin, 'skin'));      // thumb, along the edge
   if (s.coffee && side > 0) { f.push(part(at(taper(.036, .046, .12), 0, -.35, .06), 0xf2eee4)); f.push(part(at(taper(.048, .048, .018), 0, -.29, .06), 0x4a3028)); }
   if (s.laptop && side < 0) f.push(part(at(box(.03, .26, .36), -.07, -.2, .05), 0x9a9a9a, 'leather'));
-  if (s.phone && side < 0 && !s.laptop) f.push(part(at(box(.012, .14, .07), -.02, -.36, .05, -.3), 0x111111, 'leather'));
+  if (phone) {   // a smartphone, gripped: a slab the width of the palm, its lit screen facing the person
+    f.push(part(at(box(.074, .152, .008), 0, -.325, .046, 0, 0, side * .05), 0x2a2c31, 'leather'));
+    f.push(part(at(box(.066, .14, .002), 0, -.325, .0505, 0, 0, side * .05), 0xd6ecff, 'eye'));          // the screen, lit
+    f.push(part(at(box(.008, .008, .0015), 0, -.262, .0505, 0, 0, side * .05), 0x0c0c0e, 'leather'));   // front camera
+    f.push(part(at(box(.024, .024, .003), side * -.02, -.27, .0415, 0, 0, side * .05), 0x1a1b1e, 'leather')); // camera module on the back
+    for (const [dx, dy] of [[-.006, .006], [.006, -.006]]) f.push(part(at(ball(.0045, 8), side * -.02 + dx, -.27 + dy, .0405), 0x0a0a0c, 'eye'));
+  }
   return merge(f);
 }
 /** A whole arm baked with the elbow flexed by `bend`, for poses that never move. */
@@ -306,11 +316,14 @@ export class Walker {
   private moving = 0;
   private wp = 0;
   private pause = 0;
-  private yaw = 0;
+  private _yaw = 0;
   private lookDown: number;
+  /** Walking with the phone up, for the debug hook to find one. */
+  readonly onPhone: boolean;
+  get yaw() { return this._yaw; }
   constructor(seed: number, public waypoints: T.Vector3[]) {
     const s = spec(seed);
-    const onPhone = s.phone && !s.laptop;
+    const onPhone = this.onPhone = !!s.phone && !s.laptop;
     this.fig = new Figure(s, this.group, [onPhone ? 1.9 : ELBOW, s.coffee ? .9 : ELBOW]);
     this.lookDown = onPhone ? .5 : 0;
     this.speed = 1.1 + s.r() * .9;
@@ -319,8 +332,8 @@ export class Walker {
     this.phase = s.r() * 6;
     const start = waypoints[this.wp];
     this.group.position.set(start.x, start.y, start.z);
-    this.yaw = s.r() * 6.28;
-    this.group.rotation.y = this.yaw;
+    this._yaw = s.r() * 6.28;
+    this.group.rotation.y = this._yaw;
   }
   update(dt: number, t: number) {
     const p = this.group.position;
@@ -331,12 +344,12 @@ export class Walker {
       if (d < .3) { this.wp = (this.wp + 1 + Math.floor(Math.random() * 2)) % this.waypoints.length; this.pause = 1 + Math.random() * 6; }
       else {
         const target = Math.atan2(dx, dz);
-        this.yaw += Math.atan2(Math.sin(target - this.yaw), Math.cos(target - this.yaw)) * Math.min(1, dt * 5);
+        this._yaw += Math.atan2(Math.sin(target - this._yaw), Math.cos(target - this._yaw)) * Math.min(1, dt * 5);
         const s = Math.min(this.speed * dt, d);
         p.x += dx / d * s; p.z += dz / d * s; moving = 1;
       }
     }
-    this.group.rotation.y = this.yaw;
+    this.group.rotation.y = this._yaw;
     this.moving += (moving - this.moving) * Math.min(1, dt * 6);
     this.phase += dt * 7.5 * this.moving;
     this.fig.walk(this.phase, this.moving, t, this.fig.s.seed);
