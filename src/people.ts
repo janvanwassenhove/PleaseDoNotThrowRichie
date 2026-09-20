@@ -187,14 +187,24 @@ function headGeo(s: Spec) {
   if (s.beanie) p.push(part(at(dome(.19, 0, Math.PI * .6, 20), 0, y(2.1), -.01, 0, 0, 0, 1, 1.08, 1), pick(s.r, [0x8a2a2a, 0x2a2a2e, 0xc7a36a, 0x2f6b4f]), 'fleece'));
   return merge(p);
 }
-/** One arm from the shoulder pivot, elbow baked at `bend`, hand at the end (holding whatever the spec says). */
-function armGeo(s: Spec, side: number, bend = .3) {
+/** Sign convention for every joint: a limb hangs along -Y and the figure faces +Z, so a
+ *  positive rotation about X swings it BACKWARDS. Shoulders and hips take that raw angle;
+ *  elbows and knees take a flexion (positive = bends the way the joint bends), and the
+ *  code turns it the right way round: an elbow bends forward, a knee bends back. */
+const ELBOW = .3;   // the elbow pivot sits this far below the shoulder
+function upperArmGeo(s: Spec) {
   const cloth: Slot = s.style === 'hoodie' ? 'fleece' : s.style === 'blazer' ? 'wool' : 'cotton';
   const upper = s.style === 'dress' ? s.skin : s.top, upSlot: Slot = s.style === 'dress' ? 'skin' : cloth, fore = s.longSleeve ? s.top : s.skin, foreSlot: Slot = s.longSleeve ? cloth : 'skin';
   const p: T.BufferGeometry[] = [];
   p.push(part(at(taper(.068, .056, .3), 0, -.15, 0), upper, upSlot));
   if (!s.longSleeve && s.style !== 'dress') p.push(part(at(taper(.078, .072, .17), 0, -.085, 0), s.top, cloth)); // the sleeve hem
-  p.push(part(at(ball(.056, 12), 0, -.3, 0), fore, foreSlot));                                                   // elbow
+  p.push(part(at(ball(.056, 12), 0, -ELBOW, 0), fore, foreSlot));                                                // elbow
+  return merge(p);
+}
+/** The forearm from the elbow pivot, hand at the end (holding whatever the spec says). */
+function forearmGeo(s: Spec, side: number) {
+  const cloth: Slot = s.style === 'hoodie' ? 'fleece' : s.style === 'blazer' ? 'wool' : 'cotton';
+  const fore = s.longSleeve ? s.top : s.skin, foreSlot: Slot = s.longSleeve ? cloth : 'skin';
   const f: T.BufferGeometry[] = [part(at(taper(.054, .044, .27), 0, -.135, 0), fore, foreSlot)];
   if (s.longSleeve) f.push(part(at(ball(.045, 10), 0, -.27, 0), s.skin, 'skin'));                                // wrist showing
   f.push(part(at(ball(.05, 12), 0, -.32, .01, 0, 0, 0, .78, 1.15, .42), s.skin, 'skin'));                         // palm
@@ -202,8 +212,11 @@ function armGeo(s: Spec, side: number, bend = .3) {
   if (s.coffee && side > 0) { f.push(part(at(taper(.036, .046, .12), 0, -.35, .06), 0xf2eee4)); f.push(part(at(taper(.048, .048, .018), 0, -.29, .06), 0x4a3028)); }
   if (s.laptop && side < 0) f.push(part(at(box(.03, .26, .36), -.07, -.2, .05), 0x9a9a9a, 'leather'));
   if (s.phone && side < 0 && !s.laptop) f.push(part(at(box(.012, .14, .07), -.02, -.36, .05, -.3), 0x111111, 'leather'));
-  p.push(at(merge(f), 0, -.3, 0, bend));
-  return merge(p);
+  return merge(f);
+}
+/** A whole arm baked with the elbow flexed by `bend`, for poses that never move. */
+function armGeo(s: Spec, side: number, bend = ELBOW) {
+  return merge([upperArmGeo(s), at(forearmGeo(s, side), 0, -ELBOW, 0, -bend)]);
 }
 function thighGeo(s: Spec, side: number) {
   const slot: Slot = s.style === 'dress' ? 'matte' : s.jeans ? 'denim' : 'cotton', w = s.wide;
@@ -248,25 +261,36 @@ function shirtMaterial(text: string) {
 
 /** The jointed body a walker or a guard animates: meshes on pivots, one material. */
 class Figure {
-  torso: T.Mesh; head: T.Mesh; arms: T.Mesh[]; thighs: T.Mesh[]; shins: T.Mesh[];
-  constructor(public s: Spec, group: T.Group, elbows: [number, number] = [.3, .3]) {
+  torso: T.Mesh; head: T.Mesh; arms: T.Mesh[]; fore: T.Mesh[]; thighs: T.Mesh[]; shins: T.Mesh[];
+  /** `elbows` is each arm's resting flexion: a coffee is held up, a phone held to the face. */
+  constructor(public s: Spec, group: T.Group, public elbows: [number, number] = [ELBOW, ELBOW]) {
     const mesh = (geo: T.BufferGeometry, parent: T.Object3D, x: number, y: number) => { const m = new T.Mesh(geo, peopleMaterial); m.position.set(x, y, 0); m.castShadow = true; parent.add(m); return m; };
     this.torso = mesh(torsoGeo(s), group, 0, 0);
     this.head = mesh(headGeo(s), group, 0, HEAD);
-    this.arms = [-1, 1].map((side, k) => mesh(armGeo(s, side, elbows[k]), group, side * .27 * s.wide, SHOULDER));
+    this.arms = [-1, 1].map(side => mesh(upperArmGeo(s), group, side * .27 * s.wide, SHOULDER));
+    this.fore = [-1, 1].map((side, k) => mesh(forearmGeo(s, side), this.arms[k], 0, -ELBOW));
     this.thighs = [-1, 1].map(side => mesh(thighGeo(s, side), group, side * .11, HIP));
     this.shins = [-1, 1].map((side, k) => mesh(shinGeo(s, side), this.thighs[k], 0, -KNEE));
     if (s.text && s.style === 'tee') { const t = new T.Mesh(new T.PlaneGeometry(.26, .26), shirtMaterial(s.text)); t.position.set(0, 1.56, .2 * s.wide * s.chest); this.torso.add(t); }
     group.scale.setScalar(s.height);
   }
-  /** Walk cycle at phase `ph`, blended in by `m`; knees fold through the swing, the torso leans into it. */
+  /** Set an elbow's flexion (positive bends it forward, the way elbows go). */
+  elbow(k: number, flex: number) { this.fore[k].rotation.x = -flex; }
+  /** One stride of a walk at phase `ph` (2π a stride), blended in by `m`. Left leg: back at
+   *  π/2 (toe-off), forward at 3π/2 (heel strike); the right leg half a cycle behind. The
+   *  knee folds through the swing and is straight for the heel strike; the arms swing
+   *  against the legs and their elbows give a little as they come forward; the torso leans
+   *  in, the shoulders counter the hips, the head bobs with the steps and looks about when
+   *  standing. */
   walk(ph: number, m: number, t: number, seed: number) {
     const [aL, aR] = this.arms, [tL, tR] = this.thighs, [sL, sR] = this.shins, idle = Math.sin(t * 1.3 + seed) * .03;
-    tL.rotation.x = Math.sin(ph) * .55 * m; tR.rotation.x = -Math.sin(ph) * .55 * m;
-    sL.rotation.x = Math.max(0, -Math.sin(ph + .5)) * .95 * m + .04; sR.rotation.x = Math.max(0, Math.sin(ph + .5)) * .95 * m + .04;
-    aL.rotation.x = -Math.sin(ph) * .42 * m + idle; aR.rotation.x = Math.sin(ph) * .42 * m - idle;
+    const swing = Math.sin(ph), knee = (p: number) => Math.max(0, Math.sin(p - 1.1));
+    tL.rotation.x = swing * .5 * m; tR.rotation.x = -swing * .5 * m;
+    sL.rotation.x = knee(ph) * 1.0 * m + .04; sR.rotation.x = knee(ph + Math.PI) * 1.0 * m + .04;
+    aL.rotation.x = -swing * .38 * m + idle; aR.rotation.x = swing * .38 * m - idle;
     aL.rotation.z = .08 + Math.sin(t * .9 + seed) * .01; aR.rotation.z = -.08 - Math.sin(t * .9 + seed) * .01;
-    this.torso.rotation.x = -.04 * m; this.torso.rotation.y = Math.sin(ph) * .05 * m;
+    for (const k of [0, 1]) { const base = this.elbows[k], fwd = Math.max(0, k ? -swing : swing); this.elbow(k, base + (base < 1.2 ? fwd * .35 * m : 0)); }
+    this.torso.rotation.x = .05 * m; this.torso.rotation.y = swing * .05 * m;
     this.torso.scale.y = 1 + Math.sin(t * 1.1 + seed) * .006;                                     // breathing
     this.head.rotation.x = .02 + Math.sin(ph * 2) * .015 * m;
     this.head.rotation.y = (Math.sin(t * .37 + seed) * .5 + Math.sin(t * .11 + seed * 2) * .3) * (1 - m * .7) * .5;
@@ -287,7 +311,7 @@ export class Walker {
   constructor(seed: number, public waypoints: T.Vector3[]) {
     const s = spec(seed);
     const onPhone = s.phone && !s.laptop;
-    this.fig = new Figure(s, this.group, [onPhone ? 1.9 : .3, s.coffee ? .9 : .3]);
+    this.fig = new Figure(s, this.group, [onPhone ? 1.9 : ELBOW, s.coffee ? .9 : ELBOW]);
     this.lookDown = onPhone ? .5 : 0;
     this.speed = 1.1 + s.r() * .9;
     this.wp = Math.floor(s.r() * waypoints.length);
@@ -329,7 +353,7 @@ export function seatedAudience(seats: {x: number; y: number; z: number}[], seed 
     const s = spec(seed * 977 + i), yaw = (r() - .5) * .3, bend = Math.PI / 2 - .15;
     // Hips on the seat, thighs forward, shins down, forearms in the lap; a head that has
     // picked something to look at. seat.y is the cushion top.
-    const g = bake(s, {hip: [-bend, -bend], knee: [bend - .05, bend - .05], shoulder: [-.85 + (r() - .5) * .2, -.85 + (r() - .5) * .2], elbow: [1.0, 1.0], armOut: .12, headPitch: (r() - .3) * .2, headYaw: (r() - .5) * .5});
+    const g = bake(s, {hip: [-bend, -bend], knee: [bend - .05, bend - .05], shoulder: [-.5 + (r() - .5) * .2, -.5 + (r() - .5) * .2], elbow: [.9, .9], armOut: .12, headPitch: (r() - .3) * .2, headYaw: (r() - .5) * .5});
     at(g, seat.x, seat.y - .98, seat.z, 0, yaw, 0, s.height);
     parts.push(g);
   });
@@ -409,7 +433,7 @@ export class Guard {
   constructor(seed: number, public waypoints: T.Vector3[]) {
     const s = spec(seed);
     Object.assign(s, {style: 'shirt', top: 0x15181d, under: 0x15181d, pants: 0x15181d, jeans: false, shoes: 0x111111, hoodie: false, hood: false, longSleeve: true, cap: false, beanie: false, badge: false, backpack: false, coffee: false, laptop: false, phone: false, text: null, hairStyle: pick(s.r, ['buzz', 'short', 'bald'] as const), beard: false, glasses: s.r() < .2, height: 1.02 + s.r() * .08, wide: 1.05 + s.r() * .15, chest: 1.1});
-    this.fig = new Figure(s, this.group, [.25, .25]);
+    this.fig = new Figure(s, this.group, [ELBOW, ELBOW]);
     // SECURITY across the chest and the back, a radio on the shoulder, an earpiece.
     for (const [z, ry] of [[.2 * s.wide * s.chest, 0], [-.19 * s.wide, Math.PI]] as const) {
       const tag = new T.Mesh(new T.PlaneGeometry(.34, .34), shirtMaterial('SECURITY'));
@@ -522,8 +546,8 @@ export class Guard {
     this.fig.walk(this.phase, this.moving, t, this.fig.s.seed);
     const [aL, aR] = this.fig.arms, holding = this.state === 'grab' || this.state === 'throw';
     // Arms: pump while running, straight up while holding Richie, swinging through on the throw.
-    if (holding) { const armUp = this.state === 'throw' ? Math.PI - .2 + (.35 - this.timer) * 3 : Math.PI - .25; aL.rotation.x = aR.rotation.x = armUp; aL.rotation.z = .3; aR.rotation.z = -.3; this.fig.head.rotation.x = -.35; }
-    else if (this.state === 'chase' || this.state === 'alert') { aL.rotation.x *= 1.2; aR.rotation.x *= 1.2; this.fig.torso.rotation.x = -.12; this.fig.head.rotation.y = 0; }
+    if (holding) { const armUp = this.state === 'throw' ? Math.PI - .2 + (.35 - this.timer) * 3 : Math.PI - .25; aL.rotation.x = aR.rotation.x = armUp; aL.rotation.z = .3; aR.rotation.z = -.3; this.fig.elbow(0, .15); this.fig.elbow(1, .15); this.fig.head.rotation.x = -.35; }
+    else if (this.state === 'chase' || this.state === 'alert') { aL.rotation.x *= 1.3; aR.rotation.x *= 1.3; this.fig.elbow(0, 1.2); this.fig.elbow(1, 1.2); this.fig.torso.rotation.x = .14; this.fig.head.rotation.y = 0; }
     this.bang.position.y = 2.75 + Math.sin(t * 8) * .05;
     return ev;
   }
