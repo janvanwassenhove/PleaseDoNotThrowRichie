@@ -55,3 +55,8 @@ body.touch .controls{display:none}body.touch .charge{bottom:150px;right:20px;wid
    do not fit in 375px, so they split into two columns and the card tightens up. */
 .modal .panel{max-height:calc(100dvh - 24px);overflow-y:auto;overscroll-behavior:contain}
 @media (max-height:560px){#results .panel{width:min(760px,94vw);padding:16px 22px}#results .panel h2{margin:8px 0;font-size:22px}#results .stats{grid-template-columns:1fr auto 1fr auto;column-gap:22px;row-gap:5px;font-size:11px}#results .btn{margin-top:10px;padding:10px 16px}}
+/* Whose music it is, on the title screen next to the button that silences it. */
+.credit{margin:22px 0 4px;font-size:10px;letter-spacing:.14em;color:#8ea3ab}
+.credit b{color:#c9d7db;font-weight:800}
+@media (max-height:460px){.credit{display:none}}
+
