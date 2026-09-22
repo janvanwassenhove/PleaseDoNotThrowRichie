@@ -90,6 +90,7 @@ Keyboard and mouse, the full visual pass: bloom on the light fittings and robot 
 | Reset to the last checkpoint | `R` |
 | Orbit / zoom the camera | Drag / scroll |
 | Pause, or leave a run | `ESC` |
+| Music on / off | `M` |
 | Skip the opening | `SPACE`, `ENTER`, `E` or a tap |
 
 </td>
@@ -97,7 +98,7 @@ Keyboard and mouse, the full visual pass: bloom on the light fittings and robot 
 
 ### 📱 Phone and tablet
 
-On-screen controls appear on their own: a stick to aim, a big **HOP** button to charge and release, **E**, **R**, and **MENU** to pause or leave. Landscape works best. Post-processing steps aside to keep the frame rate up.
+On-screen controls appear on their own: a stick to aim, a big **HOP** button to charge and release, **E**, **R**, and **MENU** to pause or leave — the pause card also carries the music toggle. Landscape works best. Post-processing steps aside to keep the frame rate up.
 
 It is a **PWA** — *Add to Home Screen* installs it like an app, and after one visit it runs completely offline on a train.
 
@@ -118,10 +119,14 @@ This is a competition entry for the [Devoxx Belgium Robot Games](https://game.de
 - [**Game brief**](docs/GAME-BRIEF.md) — the original design brief the game was built from.
 - [**Architecture**](docs/ARCHITECTURE.md) — how the physics, venue, robots and briefing fit together.
 - [**Asset sources**](docs/ASSET-SOURCES.md) — every external asset, its licence and what was changed.
-- [**AI development log**](docs/AI-DEVELOPMENT-LOG.md) — fourteen iterations, including the ones that went wrong.
+- [**AI development log**](docs/AI-DEVELOPMENT-LOG.md) — fifteen iterations, including the ones that went wrong.
 - [**Prompts**](prompts/) — the prompts behind the implementation and the generated textures.
 
 Richie is the official Reachy Mini geometry (Apache-2.0). Voxxy, Droid, Biggy, the crowd and the venue are procedural. The venue's textures and the sponsor posters were generated with ChatGPT. The Devoxx wordmark is used to identify the conference this entry is built for.
+
+### Music
+
+**Synaptic Drift** by **mITy.John** — written, performed and produced by the author of this game. Copyright © 2026 Jan Van Wassenhove, all rights reserved, and licensed for use **in this game only**: it is not covered by the MIT licence, and may not be reused, redistributed or remixed outside *Please Do Not Throw Richie*. See [the notice](src/assets/audio/NOTICE-synaptic-drift.md). Press `M` if you would rather hop in silence.
 
 ## Run it yourself
 
@@ -180,6 +185,6 @@ Four workflows, all in `.github/workflows/`:
 **No robots were harmed in the making of this game.**
 *Richie disagrees.*
 
-MIT licensed · [Play it](https://janvanwassenhove.github.io/PleaseDoNotThrowRichie/) · [Report a bug](https://github.com/janvanwassenhove/PleaseDoNotThrowRichie/issues)
+MIT licensed, except the music · [Play it](https://janvanwassenhove.github.io/PleaseDoNotThrowRichie/) · [Report a bug](https://github.com/janvanwassenhove/PleaseDoNotThrowRichie/issues)
 
 </div>

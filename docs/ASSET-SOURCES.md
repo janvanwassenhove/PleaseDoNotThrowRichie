@@ -15,6 +15,10 @@ Asset: Voxxy, Droid, Biggy and the Kinepolis Antwerp journey. Source: the Robot 
 
 An earlier iteration could not reach the reference site and worked from its published descriptions; iteration 10 had the sheets open side by side with the game and rebuilt all three robots against them (Biggy, for one, had been a box on four legs).
 
+## Music
+
+Asset: the in-game music, `src/assets/audio/synaptic-drift.mp3` (3:05). Source: **Synaptic Drift** by **mITy.John** (Jan Van Wassenhove), the author of this game; supplied as a 44.1 kHz 16-bit stereo WAV master, which is not in this repository. Licence: copyright © 2026 Jan Van Wassenhove, all rights reserved. The author grants its use **in this game only** — see `src/assets/audio/NOTICE-synaptic-drift.md`. It is explicitly **not** covered by the repository's MIT licence, and no other use, redistribution or remixing is permitted. Modified: encoded to 128 kbps MP3 with `scripts/import-music.py` (LAME via the `lameenc` package, quality 2); nothing else was changed — no trimming, normalising or looping edits. Usage: loops under the whole game from the first press of anything, at 42% volume, ducked to 12% while the pause card is up, and silenced by `M` or either MUSIC toggle (the choice is remembered in `localStorage`).
+
 ## The Devoxx logo
 
 Asset: `src/assets/devoxx-white.svg`, the official Devoxx wordmark (white, with the orange XX and its ™). Source: https://game.devoxx.be/branding/devoxx-white.svg, the vector the Robot Games site itself serves; https://devoxx.be/ carries the same mark only as a 175×53 PNG, too small for a wall. Licence: a trademark of Devoxx, used unmodified to identify the conference this game is an entry for and set in; it is not covered by this repository's MIT licence. Modified: no. At load it is given an intrinsic size (the file has none, and some browsers will not draw a sizeless SVG to a canvas) and drawn onto dark panels — on Devoxx orange the XX would disappear. Usage: the title-screen tag, the sign over the entrance, the reception desk, the hanging banners, the foyer wall and the keynote slide. Every one of those was the word DEVOXX set in Arial before.

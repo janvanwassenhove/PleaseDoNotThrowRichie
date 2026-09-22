@@ -41,4 +41,10 @@ body.touch .controls{display:none}body.touch .charge{bottom:150px;right:20px;wid
 /* A phone in landscape has no room bottom-right: the charge meter moves up under the MENU
    button rather than sitting across the action buttons. */
 @media (max-height:520px){body.touch .charge{top:74px;bottom:auto;left:50%;right:auto;width:min(46vw,220px);transform:translateX(-50%);text-align:center;font-size:11px}}
+/* The music credit on the title screen, and the toggle that lives beside it. */
+.credit{margin:22px 0 0;font-size:10px;letter-spacing:.14em;color:#8ea3ab}
+.credit b{color:#c9d7db;font-weight:800}
+.linkbtn{margin-left:10px;background:none;border:1px solid #46606b;color:#c7d6da;border-radius:4px;padding:4px 8px;font:800 10px Arial,sans-serif;letter-spacing:.1em;cursor:pointer}
+.linkbtn:hover{background:#ffbd5c;color:#122530;border-color:#ffbd5c}
+@media (max-height:460px){.credit{display:none}}
 
