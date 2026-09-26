@@ -66,7 +66,8 @@ body.touch .controls{display:none}body.touch .charge{bottom:150px;right:20px;wid
 .card{background:#0b161db8;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid #ffffff1c;border-radius:18px;padding:16px;box-shadow:0 24px 70px #0007,inset 0 1px 0 #ffffff14;display:flex;flex-direction:column;gap:10px}
 .play{position:relative;overflow:hidden;display:flex;align-items:center;justify-content:space-between;gap:16px;width:100%;padding:14px 16px 14px 22px;border:0;border-radius:14px;background:linear-gradient(120deg,#ffd98a,#ffb640 45%,#f0640f);color:#14100a;cursor:pointer;text-align:left;box-shadow:0 12px 34px #f0640f55,inset 0 1px 0 #fff8;animation:pulse 2.6s ease-in-out infinite;transition:transform .15s,box-shadow .15s}
 .play span{display:flex;flex-direction:column;gap:4px}.play b{font:900 30px/1 'Arial Black','Helvetica Neue',Arial,sans-serif;letter-spacing:.01em}.play small{font-size:10px;letter-spacing:.2em;font-weight:800;opacity:.75}
-.play i{flex:none;width:44px;height:44px;border-radius:50%;background:#14100a;color:#ffd07a;display:grid;place-items:center;font-style:normal;font-size:16px;padding-left:3px;box-shadow:0 4px 14px #0006}
+.play i{flex:none;width:44px;height:44px;border-radius:50%;background:#14100a;color:#ffd07a;display:grid;place-items:center;font-style:normal;box-shadow:0 4px 14px #0006}.play i .ic{width:18px;height:18px;margin-left:3px}
+.ic{display:inline-block;vertical-align:-.12em}
 .play::after{content:'';position:absolute;inset:0;background:linear-gradient(115deg,transparent 30%,#ffffff55 50%,transparent 70%);transform:translateX(-120%);animation:shine 4s ease-in-out infinite}
 .play:hover{transform:translateY(-2px);box-shadow:0 18px 44px #f0640f77}.play:active{transform:translateY(0)}
 .ghost{width:100%;background:#ffffff0a;border:1px solid #ffffff22;color:#eef3f5;border-radius:12px;padding:12px;font:800 12px Arial,sans-serif;letter-spacing:.14em;cursor:pointer;transition:background .15s,border-color .15s}.ghost em{font-style:normal;color:#f0752a}.ghost:hover{background:#ffffff14;border-color:#ffbd5c88}
@@ -80,14 +81,14 @@ body.touch .route [data-k],body:not(.touch) .route [data-t]{display:none}
 .pill i{width:8px;height:8px;border-radius:50%;background:#4a5f68}.pill[aria-pressed=true] i{background:#ffbd5c;box-shadow:0 0 8px #ffbd5c}
 #music::after{content:'OFF';color:#8ea3ab}#music[aria-pressed=true]::after{content:'ON';color:#ffd07a}
 .best{font-size:11px;letter-spacing:.12em;color:#8ea3ab;margin-left:auto}.best b{color:#ffd07a}
-#title .credit{display:inline-block;margin:0 0 0 4px;text-decoration:none;transition:color .15s}#title .credit:hover{color:#ffd07a}#title .credit i{font-style:normal;color:#1ed760;margin-left:6px;font-weight:800}
+#title .credit{display:inline-block;margin:0 0 0 4px;text-decoration:none;transition:color .15s;max-width:100%}#title .credit:hover{color:#ffd07a}#title .credit i{font-style:normal;color:#1ed760;margin-left:6px;font-weight:800;white-space:nowrap}#title .credit .ic{width:11px;height:11px}
 /* The sister game: a poster in the corner on a laptop, a banner on a phone. */
 .ad{position:absolute;right:max(24px,env(safe-area-inset-right));bottom:max(40px,calc(env(safe-area-inset-bottom) + 36px));display:grid;grid-template-columns:1fr auto;column-gap:16px;align-items:center;padding:14px 18px;border:1px solid #ffffff1c;border-top:3px solid #f0640f;border-radius:12px;background:#0b0d10d9;backdrop-filter:blur(10px);color:#f6f0e1;text-decoration:none;line-height:1.3;box-shadow:0 18px 50px #0007;transition:border-color .15s,transform .15s}
 .ad:hover{border-color:#ffbd5c88;transform:translateY(-2px)}
 .ad small{grid-column:1/3;font-size:9px;letter-spacing:.2em;color:#ff7a3d}
 .ad b{font:900 24px/1.1 'Arial Black','Helvetica Neue',Arial,sans-serif;letter-spacing:-.02em;margin-top:4px}.ad b em{font-style:normal;color:#ffbd5c}
 .ad span{grid-column:1;font-size:11px;color:#c1ced0;margin-top:2px}
-.ad i{grid-column:2;grid-row:2/4;font-style:normal;font:800 11px Arial,sans-serif;letter-spacing:.14em;color:#14100a;background:linear-gradient(120deg,#ffd98a,#f0640f);padding:9px 12px;border-radius:9px;white-space:nowrap}
+.ad i{grid-column:2;grid-row:2/4;font-style:normal;font:800 11px Arial,sans-serif;letter-spacing:.14em;color:#14100a;background:linear-gradient(120deg,#ffd98a,#f0640f);padding:9px 12px;border-radius:9px;white-space:nowrap}.ad i .ic{width:11px;height:11px;margin-left:2px}.pill .ic{width:12px;height:12px}
 @keyframes rise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
 @keyframes pulse{0%,100%{box-shadow:0 12px 34px #f0640f55,inset 0 1px 0 #fff8}50%{box-shadow:0 12px 44px #f0640f88,inset 0 1px 0 #fff8}}
 @keyframes shine{0%,60%{transform:translateX(-120%)}100%{transform:translateX(120%)}}
@@ -114,9 +115,9 @@ body.touch .route [data-k],body:not(.touch) .route [data-t]{display:none}
   .ghost{padding:10px}
   .route{padding:8px 0 0}.route li{padding:0 8px;gap:1px}.route li:first-child{padding-left:0}.route strong{font-size:10px;letter-spacing:.1em}.route span{display:none}
   .best{margin-left:auto}
-  #title .credit{margin:0;font-size:9px}
+  #title .credit{margin:0;font-size:9px;letter-spacing:.08em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#title .credit .pre{display:none}
   .ad{position:static;margin:6px 16px max(36px,calc(env(safe-area-inset-bottom) + 28px));grid-template-columns:1fr auto;padding:10px 12px;border-radius:12px}
-  .ad small{font-size:8px}.ad b{font-size:18px}.ad span{font-size:10px}.ad i{grid-row:1/4;align-self:center;padding:8px 11px}
+  .ad small{font-size:8px;line-height:1.4}.ad b{font-size:18px}.ad span{font-size:10px}.ad i{align-self:center;padding:8px 11px}
 }
 /* Phone, landscape: title left, card right, banner in the corner. */
 @media (max-height:460px){
