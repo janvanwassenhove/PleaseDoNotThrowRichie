@@ -60,3 +60,60 @@ body.touch .controls{display:none}body.touch .charge{bottom:150px;right:20px;wid
 .credit b{color:#c9d7db;font-weight:800}
 @media (max-height:460px){.credit{display:none}}
 
+/* ------------------------------------------------------------------ the menu
+   One column over the hall, with a clear order: who and where, the title, one line of
+   pitch, PLAY, how it works in three tiles, then the small stuff. On a phone it is a sheet
+   from the bottom with Richie bouncing above it and PLAY under the thumb; in landscape it
+   goes two-column so nothing scrolls. */
+#title{align-items:center;padding:clamp(20px,5vw,72px);background:linear-gradient(90deg,#0a1720f7 0%,#0a1720dd 36%,#0a172050 60%,transparent 100%)}
+#title .menu{max-width:640px;display:flex;flex-direction:column;gap:16px;animation:rise .7s cubic-bezier(.2,.8,.2,1) both}
+.tagrow{display:flex;gap:8px;flex-wrap:wrap}.tag.ghost{border-color:#3a4f59;color:#9fb3ba}
+#title h1{margin:4px 0 0}
+#title .copy{margin:0;font-size:15px}
+.cta{display:flex;gap:12px;align-items:stretch;flex-wrap:wrap;margin-top:4px}
+.play{min-width:240px;background:linear-gradient(180deg,#ffd07a,#ffb640);color:#122530;border:0;border-radius:9px;padding:14px 26px;text-align:left;cursor:pointer;display:flex;flex-direction:column;gap:3px;box-shadow:0 8px 30px #ffbd5c33,inset 0 1px 0 #fff6;transition:transform .15s,box-shadow .15s}
+.play b{font-size:32px;font-weight:900;letter-spacing:-.02em;line-height:1}.play small{font-size:10px;letter-spacing:.16em;font-weight:800;opacity:.8}
+.play:hover{transform:translateY(-2px);box-shadow:0 12px 36px #ffbd5c55}.play:active{transform:translateY(0)}
+.play:focus-visible,#title .btn:focus-visible,.pill:focus-visible{outline:2px solid #ffd07a;outline-offset:3px}
+#title .btn.alt{margin:0;display:flex;flex-direction:column;justify-content:center;gap:3px;border-radius:9px;padding:12px 20px;font-size:14px}#title .btn.alt small{font-size:10px;letter-spacing:.16em;font-weight:800;color:#a9bcc4}
+.how{list-style:none;margin:4px 0 0;padding:0;display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.how li{background:#0f222bcc;border:1px solid #2f4753;border-radius:9px;padding:10px 12px;display:grid;grid-template-columns:auto 1fr;column-gap:10px;row-gap:2px;align-items:center}
+.how i{grid-row:1/3;width:32px;height:32px;border-radius:50%;background:#ffbd5c1f;color:#ffd07a;display:grid;place-items:center}
+.how svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.how b{font-size:11px;letter-spacing:.14em}.how span{font-size:11px;color:#a9bcc4;line-height:1.3}.how kbd{font-size:10px;padding:1px 5px}
+body.touch .how [data-k],body:not(.touch) .how [data-t]{display:none}
+.bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.pill{background:#10232bd9;color:#f6f0e1;border:1px solid #58727a;border-radius:20px;padding:7px 12px 7px 9px;font:800 11px Arial,sans-serif;letter-spacing:.12em;cursor:pointer;display:inline-flex;gap:8px;align-items:center}
+.pill:hover{border-color:#ffbd5c}
+.pill i{width:8px;height:8px;border-radius:50%;background:#4a5f68}.pill[aria-pressed=true] i{background:#ffbd5c;box-shadow:0 0 8px #ffbd5c}
+#music::after{content:'OFF';color:#8ea3ab}#music[aria-pressed=true]::after{content:'ON';color:#ffd07a}
+.best{font-size:11px;letter-spacing:.12em;color:#8ea3ab}.best b{color:#ffd07a}
+#title .credit{margin:0}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){#title .menu{animation:none}}
+/* Phone, portrait: a sheet from the bottom. The sister game moves to the top corner, out of its way. */
+@media (max-width:760px){
+  #title{align-items:flex-end;padding:0;background:linear-gradient(0deg,#0a1720fa 0%,#0a1720f2 58%,#0a172090 80%,transparent 100%)}
+  #title .menu{max-width:none;width:100%;padding:14px 18px max(30px,calc(env(safe-area-inset-bottom) + 26px));gap:12px}
+  #title h1{font-size:clamp(40px,12vw,64px)}
+  #title .copy{font-size:13px}
+  .cta{flex-direction:column;gap:8px}.play{width:100%;align-items:center;text-align:center;padding:14px 20px}.play b{font-size:26px}
+  #title .btn.alt{align-items:center;padding:10px 16px}
+  .how{gap:6px}.how li{padding:8px 6px;grid-template-columns:1fr;text-align:center;row-gap:3px}.how i{grid-row:auto;margin:0 auto 2px;width:28px;height:28px}.how b{font-size:9.5px;letter-spacing:.1em}.how span{font-size:10px}
+  .bar{justify-content:space-between}
+  #title .ad{top:max(14px,env(safe-area-inset-top));right:16px;bottom:auto}
+}
+/* Phone, landscape: two columns, so it all fits without scrolling. */
+@media (max-height:460px){
+  #title{align-items:center;padding:10px 4vw;background:linear-gradient(90deg,#0a1720f7,#0a1720d8 55%,#0a172060 80%,transparent)}
+  #title .menu{display:grid;grid-template-columns:auto 1fr;column-gap:22px;row-gap:8px;max-width:none;width:auto;padding:0;align-items:center}
+  .tagrow{grid-column:1/3}
+  #title h1{font-size:clamp(28px,10vh,46px);margin:0;grid-row:2/5}
+  #title .copy{display:none}
+  .cta{grid-column:2;margin:0;flex-direction:row;gap:8px}.play{width:auto;min-width:0;padding:8px 18px;text-align:left;align-items:flex-start}.play b{font-size:22px}
+  #title .btn.alt{padding:8px 14px;font-size:12px;align-items:flex-start}
+  .how{grid-column:2;grid-template-columns:repeat(3,auto);justify-content:start;gap:6px}.how li{padding:5px 10px;grid-template-columns:auto 1fr;text-align:left;row-gap:0}.how i{grid-row:1/3;width:22px;height:22px;margin:0}.how svg{width:13px;height:13px}.how b{font-size:9px}.how span{display:none}
+  .bar{grid-column:2;justify-content:flex-start}
+  #title .credit{display:none}
+  #title .ad{top:auto;bottom:max(30px,calc(env(safe-area-inset-bottom) + 26px));right:16px}
+}
