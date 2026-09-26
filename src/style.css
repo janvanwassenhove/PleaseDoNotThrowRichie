@@ -108,7 +108,7 @@ body.touch .route [data-k],body:not(.touch) .route [data-t]{display:none}
   .ribbon{padding:0 18px;margin-bottom:6px;font-size:9px;letter-spacing:.2em}.ribbon .venue{display:none}
   #title .menu{max-width:none;width:100%;padding:0 16px;gap:8px}
   #title h1{font-size:clamp(36px,11vw,56px)}
-  #title .copy{display:none}
+  #title .copy{font-size:12px;line-height:1.45;margin:0}
   .card{padding:10px;gap:8px;border-radius:16px}
   .play{padding:10px 10px 10px 16px}.play b{font-size:24px}.play i{width:36px;height:36px}
   .ghost{padding:10px}
