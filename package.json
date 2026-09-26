@@ -17,7 +17,7 @@
     "preview": "vite preview",
     "test": "vitest run",
     "screenshots": "node scripts/screenshots.mjs",
-    "icons": "node scripts/make-icons.mjs"
+    "icons": "python scripts/make-icons.py"
   },
   "dependencies": {
     "@dimforge/rapier3d-compat": "^0.19.0",

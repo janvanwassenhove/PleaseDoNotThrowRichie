@@ -17,7 +17,7 @@ export default defineConfig({
     // worker precaches every build asset (the physics wasm, Richie's GLB and the textures included).
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.svg', 'icons/*.png'],
+      includeAssets: ['favicon.png', 'icons/*.png'],
       manifest: {
         name: 'Please Do Not Throw Richie',
         short_name: 'Richie',
