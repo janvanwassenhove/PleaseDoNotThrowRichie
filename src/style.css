@@ -106,22 +106,23 @@ body.touch .route [data-k],body:not(.touch) .route [data-t]{display:none}
 @media (max-width:760px){
   #title{flex-direction:column;justify-content:flex-end;align-items:stretch;padding:0;background:radial-gradient(70% 40% at 50% 100%,#f0640f2a,transparent 70%),linear-gradient(0deg,#070f15fc 0%,#070f15f4 52%,#070f15a0 74%,transparent 100%)}
   .ribbon{padding:0 18px;margin-bottom:6px;font-size:9px;letter-spacing:.2em}.ribbon .venue{display:none}
-  #title .menu{max-width:none;width:100%;padding:0 16px;gap:10px}
-  #title h1{font-size:clamp(42px,13vw,66px)}
-  #title .copy{font-size:13px;margin:0}
-  .card{padding:12px;border-radius:16px}
-  .play{padding:12px 12px 12px 18px}.play b{font-size:26px}.play i{width:40px;height:40px}
-  .route{padding:10px 0 0}.route li{padding:0 8px}.route li:first-child{padding-left:0}.route strong{font-size:10px;letter-spacing:.1em}.route span{font-size:10px}
+  #title .menu{max-width:none;width:100%;padding:0 16px;gap:8px}
+  #title h1{font-size:clamp(36px,11vw,56px)}
+  #title .copy{display:none}
+  .card{padding:10px;gap:8px;border-radius:16px}
+  .play{padding:10px 10px 10px 16px}.play b{font-size:24px}.play i{width:36px;height:36px}
+  .ghost{padding:10px}
+  .route{padding:8px 0 0}.route li{padding:0 8px;gap:1px}.route li:first-child{padding-left:0}.route strong{font-size:10px;letter-spacing:.1em}.route span{display:none}
   .best{margin-left:auto}
   #title .credit{margin:0;font-size:9px}
-  .ad{position:static;margin:10px 16px max(38px,calc(env(safe-area-inset-bottom) + 30px));grid-template-columns:1fr auto;padding:12px 14px;border-radius:12px}
+  .ad{position:static;margin:6px 16px max(36px,calc(env(safe-area-inset-bottom) + 28px));grid-template-columns:1fr auto;padding:10px 12px;border-radius:12px}
   .ad small{font-size:8px}.ad b{font-size:18px}.ad span{font-size:10px}.ad i{grid-row:1/4;align-self:center;padding:8px 11px}
 }
 /* Phone, landscape: title left, card right, banner in the corner. */
 @media (max-height:460px){
   #title{flex-direction:row;align-items:center;justify-content:flex-start;gap:0;padding:8px 4vw;background:radial-gradient(45% 80% at 12% 70%,#f0640f2e,transparent 65%),linear-gradient(90deg,#070f15f8,#070f15e0 60%,#070f1570 82%,transparent)}
   .ribbon{position:absolute;top:8px;left:4vw;margin:0;padding:0}.version{right:auto;left:4vw}
-  #title .menu{display:grid;grid-template-columns:auto minmax(300px,380px);column-gap:20px;align-items:center;width:auto;max-width:none;padding:0}
+  #title .menu{display:grid;grid-template-columns:auto minmax(280px,340px);column-gap:20px;align-items:center;width:auto;max-width:none;padding:0}
   #title h1{font-size:clamp(28px,11vh,48px);grid-row:1/3}
   #title .copy{display:none}
   .card{padding:10px;gap:6px;border-radius:14px}
