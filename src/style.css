@@ -2,15 +2,6 @@
 
 #boot{position:fixed;inset:0;z-index:20;display:grid;place-items:center;background:#0d1c27;padding:8vw;text-align:center}#boot b{display:block;font-size:13px;letter-spacing:.1em}#boot span{display:block;margin-top:14px;color:#aec0c5;line-height:1.6;max-width:520px}#boot code{display:block;margin-top:14px;font:11px monospace;color:#7f949b}#boot .btn{display:inline-block;margin-top:18px;text-decoration:none}#boot.failed b{color:#ffbd5c}
 .version{position:fixed;right:18px;bottom:14px;z-index:6;font-size:10px;letter-spacing:.14em;color:#64808b}
-/* The sister game's poster, bottom right of the title screen, above the version badge. */
-.ad{position:absolute;right:max(18px,env(safe-area-inset-right));bottom:max(38px,calc(env(safe-area-inset-bottom) + 34px));display:block;padding:12px 16px;border:1px solid #6b5330;border-radius:5px;background:#1a1410e6;color:#f6f0e1;text-decoration:none;line-height:1.3;backdrop-filter:blur(3px);transition:border-color .15s,transform .15s}
-.ad:hover{border-color:#ffbd5c;transform:translateY(-2px)}
-.ad small{display:block;font-size:9px;letter-spacing:.18em;color:#ff7a3d}
-.ad b{display:block;font-size:22px;font-weight:900;letter-spacing:-.03em;margin:4px 0 2px}.ad b em{font-style:normal;color:#ffbd5c}
-.ad span{display:block;font-size:11px;color:#c1ced0}.ad span i{font-style:normal;font-weight:800;color:#ffbd5c;margin-left:6px}
-/* On a phone it steps back to a quiet line of text: the game on screen is this one. */
-@media (max-width:760px),(max-height:460px){.ad{right:max(16px,env(safe-area-inset-right));bottom:max(30px,calc(env(safe-area-inset-bottom) + 26px));padding:0;border:0;background:none;backdrop-filter:none;color:#7f97a1}.ad:hover{transform:none}.ad small,.ad span{display:none}.ad b{font-size:10px;font-weight:700;letter-spacing:.14em;margin:0}.ad b::before{content:'ALSO PLAY ';font-weight:400}.ad b em{color:inherit}.ad b::after{content:' ↗'}}
-
 /* Touch controls: a stick to aim with on the left, the three actions on the right. Shown
    only on coarse-pointer devices; the keyboard legend hides in their favour. */
 /* Only while actually playing: the layer follows the HUD, and hides behind the pause and results panels. */
@@ -61,59 +52,85 @@ body.touch .controls{display:none}body.touch .charge{bottom:150px;right:20px;wid
 @media (max-height:460px){.credit{display:none}}
 
 /* ------------------------------------------------------------------ the menu
-   One column over the hall, with a clear order: who and where, the title, one line of
-   pitch, PLAY, how it works in three tiles, then the small stuff. On a phone it is a sheet
-   from the bottom with Richie bouncing above it and PLAY under the thumb; in landscape it
-   goes two-column so nothing scrolls. */
-#title{align-items:center;padding:clamp(20px,5vw,72px);background:linear-gradient(90deg,#0a1720f7 0%,#0a1720dd 36%,#0a172050 60%,transparent 100%)}
-#title .menu{max-width:640px;display:flex;flex-direction:column;gap:16px;animation:rise .7s cubic-bezier(.2,.8,.2,1) both}
-.tagrow{display:flex;gap:8px;flex-wrap:wrap}.tag.ghost{border-color:#3a4f59;color:#9fb3ba}
-#title h1{margin:4px 0 0}
-#title .copy{margin:0;font-size:15px}
-.cta{display:flex;gap:12px;align-items:stretch;flex-wrap:wrap;margin-top:4px}
-.play{min-width:240px;background:linear-gradient(180deg,#ffd07a,#ffb640);color:#122530;border:0;border-radius:9px;padding:14px 26px;text-align:left;cursor:pointer;display:flex;flex-direction:column;gap:3px;box-shadow:0 8px 30px #ffbd5c33,inset 0 1px 0 #fff6;transition:transform .15s,box-shadow .15s}
-.play b{font-size:32px;font-weight:900;letter-spacing:-.02em;line-height:1}.play small{font-size:10px;letter-spacing:.16em;font-weight:800;opacity:.8}
-.play:hover{transform:translateY(-2px);box-shadow:0 12px 36px #ffbd5c55}.play:active{transform:translateY(0)}
-.play:focus-visible,#title .btn:focus-visible,.pill:focus-visible{outline:2px solid #ffd07a;outline-offset:3px}
-#title .btn.alt{margin:0;display:flex;flex-direction:column;justify-content:center;gap:3px;border-radius:9px;padding:12px 20px;font-size:14px}#title .btn.alt small{font-size:10px;letter-spacing:.16em;font-weight:800;color:#a9bcc4}
-.how{list-style:none;margin:4px 0 0;padding:0;display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-.how li{background:#0f222bcc;border:1px solid #2f4753;border-radius:9px;padding:10px 12px;display:grid;grid-template-columns:auto 1fr;column-gap:10px;row-gap:2px;align-items:center}
-.how i{grid-row:1/3;width:32px;height:32px;border-radius:50%;background:#ffbd5c1f;color:#ffd07a;display:grid;place-items:center}
-.how svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.how b{font-size:11px;letter-spacing:.14em}.how span{font-size:11px;color:#a9bcc4;line-height:1.3}.how kbd{font-size:10px;padding:1px 5px}
-body.touch .how [data-k],body:not(.touch) .how [data-t]{display:none}
-.bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-.pill{background:#10232bd9;color:#f6f0e1;border:1px solid #58727a;border-radius:20px;padding:7px 12px 7px 9px;font:800 11px Arial,sans-serif;letter-spacing:.12em;cursor:pointer;display:inline-flex;gap:8px;align-items:center}
-.pill:hover{border-color:#ffbd5c}
+   A poster over the hall: a rim of Devoxx orange behind the title, the title in display
+   weight with THROW lit, one glass card holding PLAY, the briefing, the three moves as a
+   numbered route, and the small controls. On a phone the card is a sheet from the bottom
+   with PLAY under the thumb and the sister game as a banner beneath; in landscape the
+   title and the card sit side by side so nothing scrolls. */
+#title{flex-direction:column;justify-content:center;align-items:flex-start;gap:14px;padding:clamp(20px,5vw,72px);background:radial-gradient(55% 70% at 16% 72%,#f0640f2e,transparent 65%),linear-gradient(90deg,#070f15f8 0%,#070f15e6 34%,#070f1570 58%,transparent 100%)}
+.ribbon{font-size:10px;white-space:nowrap;letter-spacing:.24em;color:#c5d3d8;display:flex;align-items:center;gap:8px}.ribbon .dvx{height:10px;margin:0}.ribbon i{font-style:normal;color:#f0752a}.ribbon .venue{display:contents}
+#title .menu{max-width:600px;display:flex;flex-direction:column;gap:14px;animation:rise .8s cubic-bezier(.2,.8,.2,1) both}
+#title h1{font-family:'Arial Black','Helvetica Neue',Arial,sans-serif;font-weight:900;font-size:clamp(56px,min(8.4vw,12.5vh),124px);line-height:.84;letter-spacing:-.05em;margin:0;text-shadow:0 14px 50px #000a}
+#title h1 em{color:#ffbd5c;background:linear-gradient(180deg,#ffd98a 10%,#f0640f 90%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+#title .copy{margin:2px 0 4px;font-size:15px;color:#d4dde0;text-shadow:0 2px 12px #000}
+.card{background:#0b161db8;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid #ffffff1c;border-radius:18px;padding:16px;box-shadow:0 24px 70px #0007,inset 0 1px 0 #ffffff14;display:flex;flex-direction:column;gap:10px}
+.play{position:relative;overflow:hidden;display:flex;align-items:center;justify-content:space-between;gap:16px;width:100%;padding:14px 16px 14px 22px;border:0;border-radius:14px;background:linear-gradient(120deg,#ffd98a,#ffb640 45%,#f0640f);color:#14100a;cursor:pointer;text-align:left;box-shadow:0 12px 34px #f0640f55,inset 0 1px 0 #fff8;animation:pulse 2.6s ease-in-out infinite;transition:transform .15s,box-shadow .15s}
+.play span{display:flex;flex-direction:column;gap:4px}.play b{font:900 30px/1 'Arial Black','Helvetica Neue',Arial,sans-serif;letter-spacing:.01em}.play small{font-size:10px;letter-spacing:.2em;font-weight:800;opacity:.75}
+.play i{flex:none;width:44px;height:44px;border-radius:50%;background:#14100a;color:#ffd07a;display:grid;place-items:center;font-style:normal;font-size:16px;padding-left:3px;box-shadow:0 4px 14px #0006}
+.play::after{content:'';position:absolute;inset:0;background:linear-gradient(115deg,transparent 30%,#ffffff55 50%,transparent 70%);transform:translateX(-120%);animation:shine 4s ease-in-out infinite}
+.play:hover{transform:translateY(-2px);box-shadow:0 18px 44px #f0640f77}.play:active{transform:translateY(0)}
+.ghost{width:100%;background:#ffffff0a;border:1px solid #ffffff22;color:#eef3f5;border-radius:12px;padding:12px;font:800 12px Arial,sans-serif;letter-spacing:.14em;cursor:pointer;transition:background .15s,border-color .15s}.ghost em{font-style:normal;color:#f0752a}.ghost:hover{background:#ffffff14;border-color:#ffbd5c88}
+.play:focus-visible,.ghost:focus-visible,.pill:focus-visible,.ad:focus-visible{outline:2px solid #ffd07a;outline-offset:3px}
+.route{list-style:none;margin:4px 0 0;padding:12px 0 2px;border-top:1px solid #ffffff14;display:flex}
+.route li{flex:1;display:flex;flex-direction:column;gap:3px;padding:0 12px}.route li:first-child{padding-left:2px}.route li+li{border-left:1px solid #ffffff14}
+.route b{font-size:10px;letter-spacing:.24em;color:#f0752a}.route strong{font-size:11px;letter-spacing:.14em}.route span{font-size:11px;color:#9fb3ba;line-height:1.35}.route kbd{font-size:10px;padding:1px 5px}
+body.touch .route [data-k],body:not(.touch) .route [data-t]{display:none}
+.bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding-top:2px}
+.pill{background:#ffffff0a;color:#eef3f5;border:1px solid #ffffff22;border-radius:20px;padding:7px 12px 7px 9px;font:800 11px Arial,sans-serif;letter-spacing:.12em;cursor:pointer;display:inline-flex;gap:8px;align-items:center}.pill:hover{border-color:#ffbd5c88}
 .pill i{width:8px;height:8px;border-radius:50%;background:#4a5f68}.pill[aria-pressed=true] i{background:#ffbd5c;box-shadow:0 0 8px #ffbd5c}
 #music::after{content:'OFF';color:#8ea3ab}#music[aria-pressed=true]::after{content:'ON';color:#ffd07a}
-.best{font-size:11px;letter-spacing:.12em;color:#8ea3ab}.best b{color:#ffd07a}
-#title .credit{margin:0}
-@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
-@media (prefers-reduced-motion:reduce){#title .menu{animation:none}}
-/* Phone, portrait: a sheet from the bottom. The sister game moves to the top corner, out of its way. */
-@media (max-width:760px){
-  #title{align-items:flex-end;padding:0;background:linear-gradient(0deg,#0a1720fa 0%,#0a1720f2 58%,#0a172090 80%,transparent 100%)}
-  #title .menu{max-width:none;width:100%;padding:14px 18px max(30px,calc(env(safe-area-inset-bottom) + 26px));gap:12px}
-  #title h1{font-size:clamp(40px,12vw,64px)}
-  #title .copy{font-size:13px}
-  .cta{flex-direction:column;gap:8px}.play{width:100%;align-items:center;text-align:center;padding:14px 20px}.play b{font-size:26px}
-  #title .btn.alt{align-items:center;padding:10px 16px}
-  .how{gap:6px}.how li{padding:8px 6px;grid-template-columns:1fr;text-align:center;row-gap:3px}.how i{grid-row:auto;margin:0 auto 2px;width:28px;height:28px}.how b{font-size:9.5px;letter-spacing:.1em}.how span{font-size:10px}
-  .bar{justify-content:space-between}
-  #title .ad{top:max(14px,env(safe-area-inset-top));right:16px;bottom:auto}
-}
-/* Phone, landscape: two columns, so it all fits without scrolling. */
-@media (max-height:460px){
-  #title{align-items:center;padding:10px 4vw;background:linear-gradient(90deg,#0a1720f7,#0a1720d8 55%,#0a172060 80%,transparent)}
-  #title .menu{display:grid;grid-template-columns:auto 1fr;column-gap:22px;row-gap:8px;max-width:none;width:auto;padding:0;align-items:center}
-  .tagrow{grid-column:1/3}
-  #title h1{font-size:clamp(28px,10vh,46px);margin:0;grid-row:2/5}
-  #title .copy{display:none}
-  .cta{grid-column:2;margin:0;flex-direction:row;gap:8px}.play{width:auto;min-width:0;padding:8px 18px;text-align:left;align-items:flex-start}.play b{font-size:22px}
-  #title .btn.alt{padding:8px 14px;font-size:12px;align-items:flex-start}
-  .how{grid-column:2;grid-template-columns:repeat(3,auto);justify-content:start;gap:6px}.how li{padding:5px 10px;grid-template-columns:auto 1fr;text-align:left;row-gap:0}.how i{grid-row:1/3;width:22px;height:22px;margin:0}.how svg{width:13px;height:13px}.how b{font-size:9px}.how span{display:none}
-  .bar{grid-column:2;justify-content:flex-start}
+.best{font-size:11px;letter-spacing:.12em;color:#8ea3ab;margin-left:auto}.best b{color:#ffd07a}
+#title .credit{margin:0 0 0 4px}
+/* The sister game: a poster in the corner on a laptop, a banner on a phone. */
+.ad{position:absolute;right:max(24px,env(safe-area-inset-right));bottom:max(40px,calc(env(safe-area-inset-bottom) + 36px));display:grid;grid-template-columns:1fr auto;column-gap:16px;align-items:center;padding:14px 18px;border:1px solid #ffffff1c;border-top:3px solid #f0640f;border-radius:12px;background:#0b0d10d9;backdrop-filter:blur(10px);color:#f6f0e1;text-decoration:none;line-height:1.3;box-shadow:0 18px 50px #0007;transition:border-color .15s,transform .15s}
+.ad:hover{border-color:#ffbd5c88;transform:translateY(-2px)}
+.ad small{grid-column:1/3;font-size:9px;letter-spacing:.2em;color:#ff7a3d}
+.ad b{font:900 24px/1.1 'Arial Black','Helvetica Neue',Arial,sans-serif;letter-spacing:-.02em;margin-top:4px}.ad b em{font-style:normal;color:#ffbd5c}
+.ad span{grid-column:1;font-size:11px;color:#c1ced0;margin-top:2px}
+.ad i{grid-column:2;grid-row:2/4;font-style:normal;font:800 11px Arial,sans-serif;letter-spacing:.14em;color:#14100a;background:linear-gradient(120deg,#ffd98a,#f0640f);padding:9px 12px;border-radius:9px;white-space:nowrap}
+@keyframes rise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+@keyframes pulse{0%,100%{box-shadow:0 12px 34px #f0640f55,inset 0 1px 0 #fff8}50%{box-shadow:0 12px 44px #f0640f88,inset 0 1px 0 #fff8}}
+@keyframes shine{0%,60%{transform:translateX(-120%)}100%{transform:translateX(120%)}}
+@media (prefers-reduced-motion:reduce){#title .menu,.play,.play::after{animation:none}}
+/* A short laptop screen (a 13-inch at 100% with browser chrome): the same column, tighter. */
+@media (min-width:761px) and (min-height:461px) and (max-height:760px){
+  #title{padding:18px clamp(20px,5vw,72px);gap:8px}
+  #title h1{font-size:clamp(40px,10.5vh,110px)}
+  #title .menu{gap:10px}
+  #title .copy{font-size:13px;margin:0}
+  .card{padding:12px;gap:8px}
+  .play{padding:10px 12px 10px 18px}.play b{font-size:26px}.play i{width:38px;height:38px}
+  .route{padding:8px 0 0}.route span{display:none}
   #title .credit{display:none}
-  #title .ad{top:auto;bottom:max(30px,calc(env(safe-area-inset-bottom) + 26px));right:16px}
+}
+/* Phone, portrait: a sheet from the bottom; the sister game a banner under it. */
+@media (max-width:760px){
+  #title{flex-direction:column;justify-content:flex-end;align-items:stretch;padding:0;background:radial-gradient(70% 40% at 50% 100%,#f0640f2a,transparent 70%),linear-gradient(0deg,#070f15fc 0%,#070f15f4 52%,#070f15a0 74%,transparent 100%)}
+  .ribbon{padding:0 18px;margin-bottom:6px;font-size:9px;letter-spacing:.2em}.ribbon .venue{display:none}
+  #title .menu{max-width:none;width:100%;padding:0 16px;gap:10px}
+  #title h1{font-size:clamp(42px,13vw,66px)}
+  #title .copy{font-size:13px;margin:0}
+  .card{padding:12px;border-radius:16px}
+  .play{padding:12px 12px 12px 18px}.play b{font-size:26px}.play i{width:40px;height:40px}
+  .route{padding:10px 0 0}.route li{padding:0 8px}.route li:first-child{padding-left:0}.route strong{font-size:10px;letter-spacing:.1em}.route span{font-size:10px}
+  .best{margin-left:auto}
+  #title .credit{margin:0;font-size:9px}
+  .ad{position:static;margin:10px 16px max(38px,calc(env(safe-area-inset-bottom) + 30px));grid-template-columns:1fr auto;padding:12px 14px;border-radius:12px}
+  .ad small{font-size:8px}.ad b{font-size:18px}.ad span{font-size:10px}.ad i{grid-row:1/4;align-self:center;padding:8px 11px}
+}
+/* Phone, landscape: title left, card right, banner in the corner. */
+@media (max-height:460px){
+  #title{flex-direction:row;align-items:center;justify-content:flex-start;gap:0;padding:8px 4vw;background:radial-gradient(45% 80% at 12% 70%,#f0640f2e,transparent 65%),linear-gradient(90deg,#070f15f8,#070f15e0 60%,#070f1570 82%,transparent)}
+  .ribbon{position:absolute;top:8px;left:4vw;margin:0;padding:0}.version{right:auto;left:4vw}
+  #title .menu{display:grid;grid-template-columns:auto minmax(300px,380px);column-gap:20px;align-items:center;width:auto;max-width:none;padding:0}
+  #title h1{font-size:clamp(28px,11vh,48px);grid-row:1/3}
+  #title .copy{display:none}
+  .card{padding:10px;gap:6px;border-radius:14px}
+  .play{padding:8px 10px 8px 14px}.play b{font-size:20px}.play small{font-size:8px}.play i{width:32px;height:32px;font-size:12px}
+  .ghost{padding:8px;font-size:10px}
+  .route{padding:8px 0 0;margin:0}.route li{padding:0 8px;gap:1px}.route li:first-child{padding-left:0}.route b{font-size:8px}.route strong{font-size:9px}.route span{display:none}
+  .bar{padding:0}.pill{padding:5px 10px 5px 8px;font-size:10px}.best{font-size:9px}
+  #title .credit{display:none}
+  .ad{position:absolute;right:12px;bottom:10px;margin:0;grid-template-columns:auto auto;padding:8px 12px;gap:0 12px;border-radius:10px}
+  .ad small,.ad span{display:none}.ad b{font-size:14px;margin:0;grid-row:1}.ad i{grid-row:1;padding:6px 9px;font-size:9px}
 }
